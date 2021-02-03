@@ -7,6 +7,7 @@ Created on Jan 30, 2021
 import pygame
 import time
 import random
+from collections import deque
 #Initializing pygame
 pygame.init()
 pygame.mixer.init()
@@ -201,17 +202,24 @@ class Maze:
     def dfs(self):   
         fringe = self.get_fringe(0,0)
         i = 0;
+        
         while (fringe != []):
+            
             current = fringe.pop() #current is of type Square
-            print("Here")
-            print(type(current))
+            print("popped" + str(current.get_pos()))
+            #print(type(current))
             if current.get_type() == 2: #goal state if Square's type is 2
                 return "success, goal reached"
             m, n = current.get_pos()
-            fringe.append(self.get_fringe(m, n))
-            print("idhar"+str(type(self.get_fringe(m, n))))
+            temp = self.get_fringe(m, n) #temporary list from get_fringe method
+            for k in range(0, len(temp)): #iterate through temp in fifo order and add it to fringe so that peek of fringe is the last element visited in get_fringe
+                fringe.append(temp[k])
+            
+            #print("idhar"+str(type(self.get_fringe(m, n))))
             #prev = current
             i= i+1
+            if i==8:
+                break
         return "failed"
             
             
