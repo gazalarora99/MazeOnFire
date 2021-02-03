@@ -6,8 +6,6 @@ Created on Jan 30, 2021
 import pygame
 import time
 import random
-from boto.cloudformation import stack
-from networkx.generators.tests.test_small import null
 #Initializing pygame
 pygame.init()
 pygame.mixer.init()
@@ -196,23 +194,23 @@ class Maze:
                         if self.grid[k].get_type==0: #bottom square
                             stack.append(self.grid[k])
                     
-                    
                     return stack
     
     
     def dfs(self):   
         fringe = self.get_fringe(0,0)
-        #prev = null
-        
+        i = 0;
         while (fringe != []):
             current = fringe.pop() #current is of type Square
+            print("Here")
             print(type(current))
             if current.get_type() == 2: #goal state if Square's type is 2
                 return "success, goal reached"
             m, n = current.get_pos()
             fringe.append(self.get_fringe(m, n))
+            print("idhar"+str(type(self.get_fringe(m, n))))
             #prev = current
-        
+            i= i+1
         return "failed"
             
             
