@@ -1,7 +1,8 @@
 '''
 Created on Jan 30, 2021
 
-@author: Jishan
+@author: Jishan Desai
+@author: Gazal Arora
 '''
 import pygame
 import time
@@ -43,7 +44,7 @@ class Maze:
         self.grid = []
     ### makes 2d array with given dimensions and has square objects in it.
     def populate_grid(self,dimension,pr):
-        k=0
+        
         for i in range(0,self.rows):
             print()
             
@@ -51,24 +52,24 @@ class Maze:
                 if i == 0 and j == 0:
                     #self.grid.append()
                     self.grid.append(Square(i,j,dimension,3))
-                    k+=1
+                    
                     print("S", end = " ")
                 elif i == self.rows -1 and j == self.cols -1 :
                     #self.grid.append([])
                     self.grid.append(Square(i,j,dimension,2))
-                    k+=1
+                    
                     print("E ", end = " ")
                 else:
                     x = random.uniform(0, 1)
                     if x <= pr:
                         #self.grid.append([])
                         self.grid.append(Square(i,j,dimension,1))
-                        k+=1
+                        
                         print("@",end = " ")
                     else:
                         #self.grid.append([])
                         self.grid.append(Square(i,j,dimension,0))
-                        k+=1
+                        
                         print("_",end = " ")  
         
             
