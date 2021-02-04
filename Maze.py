@@ -8,6 +8,7 @@ import pygame
 import time
 import random
 from collections import deque
+from boto.cloudformation import stack
 #Initializing pygame
 pygame.init()
 pygame.mixer.init()
@@ -23,6 +24,8 @@ class Square:
         self.col = col_num
         self.width = dimension // 500
         self.Square_type = square_type
+        self.parent_row = None
+        self.parent_col = None
         self.isStart = row_num == 0 and col_num == 0;
         if self.Square_type == 1:
             self.color = BLACK
@@ -36,6 +39,10 @@ class Square:
         return self.Square_type
     def get_isStart(self):
         return self.isStart
+    def set_parent(self, parent_row, parent_col):
+        self.parent_row = parent_row
+        self.parent_col = parent_col
+        
 class Maze:
     def __init__(self,dimension,pr):
         self.rows = dimension
@@ -107,32 +114,48 @@ class Maze:
                 if i==r and j==c:
                     if i==self.rows-1 and j==self.cols-1: #check if its goal state
                         k = (self.cols*i) + j
+                        self.grid[k].set_parent(i,j)
                         stack.append(self.grid[k])
                         return stack
                     if i==0 and j==0:
                         k = (self.cols*i) + j
                         if self.grid[k+1].get_type()==0: #right square
+                            self.grid[k+1].set_parent(i,j)
                             stack.append(self.grid[k+1])
                         k =  (self.cols * (i+1)) + j
                         if self.grid[k].get_type() ==0: #bottom square
+                            self.grid[k].set_parent(i,j)
                             stack.append(self.grid[k])
                         return stack
-                    
+                    if i==self.rows-1 and j==self.rows-2:
+                        k = (self.cols*i) + j 
+                        self.grid[k+1].set_parent(i,j)
+                        stack.append(self.grid[k+1]) #right square that is goal
+                        return stack
+                    if j==self.cols -1 and i==self.rows-2:
+                        k =  (self.cols * (i-1)) + j
+                        self.grid[k].set_parent(i,j)
+                        stack.append(self.grid[k])
+                        return stack
                     if i==0 and j==self.cols-1: #top-right corner so can only go left or bottom here
                         k = (self.cols*i) + j
                         if self.grid[k-1].get_type()==0: #left square
+                            self.grid[k-1].set_parent(i,j)
                             stack.append(self.grid[k-1])
                         k =  (self.cols * (i+1)) + j
                         if self.grid[k].get_type()==0: #bottom square
+                            self.grid[k].set_parent(i,j)
                             stack.append(self.grid[k])
                         return stack
                     if j==0 and i==self.rows-1: #bottom-left corner so can only go top or right here
                         
                         k =  (self.cols * (i-1)) + j
                         if self.grid[k].get_type()==0: #top square
+                            self.grid[k].set_parent(i,j)
                             stack.append(self.grid[k])
                         k = (self.cols*i) + j
                         if self.grid[k+1].get_type()==0: #right square
+                            self.grid[k+1].set_parent(i,j)
                             stack.append(self.grid[k+1])
                         return stack
                     
@@ -144,56 +167,72 @@ class Maze:
                     if i==0 and j>0 and j<self.cols -1:
                         k = (self.cols*i) + j
                         if self.grid[k-1].get_type()==0: #left square
+                            self.grid[k-1].set_parent(i,j)
                             stack.append(self.grid[k-1])
                         if self.grid[k+1].get_type()==0: #right square
+                            self.grid[k+1].set_parent(i,j)
                             stack.append(self.grid[k+1])
                         k =  (self.cols * (i+1)) + j
                         if self.grid[k].get_type()==0: #bottom square
+                            self.grid[k].set_parent(i,j)
                             stack.append(self.grid[k])
                     if j==0 and i>0 and i<self.rows -1:
                         k =  (self.cols * (i-1)) + j
                         if self.grid[k].get_type()==0: #top square
+                            self.grid[k].set_parent(i,j)
                             stack.append(self.grid[k])
                         k = (self.cols*i) + j
                         if self.grid[k+1].get_type()==0: #right square
+                            self.grid[k+1].set_parent(i,j)
                             stack.append(self.grid[k+1])
                         k =  (self.cols * (i+1)) + j
                         if self.grid[k].get_type()==0: #bottom square
+                            self.grid[k].set_parent(i,j)
                             stack.append(self.grid[k])
                         
                     if i==self.rows -1 and j>0 and j<self.cols-1:
                         k =  (self.cols * (i-1)) + j
                         if self.grid[k].get_type()==0: #top square
+                            self.grid[k].set_parent(i,j)
                             stack.append(self.grid[k])
                         k = (self.cols*i) + j
                         if self.grid[k-1].get_type()==0: #left square
+                            self.grid[k-1].set_parent(i,j)
                             stack.append(self.grid[k-1])
                         if self.grid[k+1].get_type()==0: #right square
+                            self.grid[k+1].set_parent(i,j)
                             stack.append(self.grid[k+1])
                     if j==self.cols -1 and i>0 and i<self.rows-1:
                         k =  (self.cols * (i-1)) + j
                         if self.grid[k].get_type()==0: #top square
+                            self.grid[k].set_parent(i,j)
                             stack.append(self.grid[k])
                         k = (self.cols*i) + j
-                        if self.grid[k-1].get_type()==0: #left square
+                        if self.grid[k-1].get_type()==0:
+                            self.grid[k-1].set_parent(i,j) #left square
                             stack.append(self.grid[k-1])
                         k =  (self.cols * (i+1)) + j
                         if self.grid[k].get_type()==0: #bottom square
+                            self.grid[k].set_parent(i,j)
                             stack.append(self.grid[k])
                             
                     if i>0 and i<self.rows-1 and j>0 and j<self.cols-1 :
                         k = (self.cols*i) + j
                         if self.grid[k-1].get_type()==0: #left square
+                            self.grid[k-1].set_parent(i,j)
                             stack.append(self.grid[k-1])
                         
                         k =  (self.cols * (i-1)) + j
                         if self.grid[k].get_type()==0: #top square
+                            self.grid[k].set_parent(i,j)
                             stack.append(self.grid[k])
                         k = (self.cols*i) + j
                         if self.grid[k+1].get_type()==0: #right square
+                            self.grid[k+1].set_parent(i,j)
                             stack.append(self.grid[k+1])
                         k =  (self.cols * (i+1)) + j
                         if self.grid[k].get_type()==0: #bottom square
+                            self.grid[k].set_parent(i,j)
                             stack.append(self.grid[k])
                     
                     return stack
@@ -218,8 +257,8 @@ class Maze:
             #print("idhar"+str(type(self.get_fringe(m, n))))
             #prev = current
             i= i+1
-            ##if i==8:
-                ##break
+            if i==14:
+                break
         return "failed"
             
             
