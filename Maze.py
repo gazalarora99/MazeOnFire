@@ -114,7 +114,7 @@ class Maze:
                         if self.grid[k+1].get_type()==0: #right square
                             stack.append(self.grid[k+1])
                         k =  (self.cols * (i+1)) + j
-                        if self.grid[k].get_type==0: #bottom square
+                        if self.grid[k].get_type() ==0: #bottom square
                             stack.append(self.grid[k])
                         return stack
                     
@@ -123,13 +123,13 @@ class Maze:
                         if self.grid[k-1].get_type()==0: #left square
                             stack.append(self.grid[k-1])
                         k =  (self.cols * (i+1)) + j
-                        if self.grid[k].get_type==0: #bottom square
+                        if self.grid[k].get_type()==0: #bottom square
                             stack.append(self.grid[k])
                         return stack
                     if j==0 and i==self.rows-1: #bottom-left corner so can only go top or right here
                         
                         k =  (self.cols * (i-1)) + j
-                        if self.grid[k].get_type==0: #top square
+                        if self.grid[k].get_type()==0: #top square
                             stack.append(self.grid[k])
                         k = (self.cols*i) + j
                         if self.grid[k+1].get_type()==0: #right square
@@ -148,22 +148,22 @@ class Maze:
                         if self.grid[k+1].get_type()==0: #right square
                             stack.append(self.grid[k+1])
                         k =  (self.cols * (i+1)) + j
-                        if self.grid[k].get_type==0: #bottom square
+                        if self.grid[k].get_type()==0: #bottom square
                             stack.append(self.grid[k])
                     if j==0 and i>0 and i<self.rows -1:
                         k =  (self.cols * (i-1)) + j
-                        if self.grid[k].get_type==0: #top square
+                        if self.grid[k].get_type()==0: #top square
                             stack.append(self.grid[k])
                         k = (self.cols*i) + j
                         if self.grid[k+1].get_type()==0: #right square
                             stack.append(self.grid[k+1])
                         k =  (self.cols * (i+1)) + j
-                        if self.grid[k].get_type==0: #bottom square
+                        if self.grid[k].get_type()==0: #bottom square
                             stack.append(self.grid[k])
                         
                     if i==self.rows -1 and j>0 and j<self.cols-1:
                         k =  (self.cols * (i-1)) + j
-                        if self.grid[k].get_type==0: #top square
+                        if self.grid[k].get_type()==0: #top square
                             stack.append(self.grid[k])
                         k = (self.cols*i) + j
                         if self.grid[k-1].get_type()==0: #left square
@@ -172,13 +172,13 @@ class Maze:
                             stack.append(self.grid[k+1])
                     if j==self.cols -1 and i>0 and i<self.rows-1:
                         k =  (self.cols * (i-1)) + j
-                        if self.grid[k].get_type==0: #top square
+                        if self.grid[k].get_type()==0: #top square
                             stack.append(self.grid[k])
                         k = (self.cols*i) + j
                         if self.grid[k-1].get_type()==0: #left square
                             stack.append(self.grid[k-1])
                         k =  (self.cols * (i+1)) + j
-                        if self.grid[k].get_type==0: #bottom square
+                        if self.grid[k].get_type()==0: #bottom square
                             stack.append(self.grid[k])
                             
                     if i>0 and i<self.rows-1 and j>0 and j<self.cols-1 :
@@ -187,13 +187,13 @@ class Maze:
                             stack.append(self.grid[k-1])
                         
                         k =  (self.cols * (i-1)) + j
-                        if self.grid[k].get_type==0: #top square
+                        if self.grid[k].get_type()==0: #top square
                             stack.append(self.grid[k])
                         k = (self.cols*i) + j
                         if self.grid[k+1].get_type()==0: #right square
                             stack.append(self.grid[k+1])
                         k =  (self.cols * (i+1)) + j
-                        if self.grid[k].get_type==0: #bottom square
+                        if self.grid[k].get_type()==0: #bottom square
                             stack.append(self.grid[k])
                     
                     return stack
@@ -218,8 +218,8 @@ class Maze:
             #print("idhar"+str(type(self.get_fringe(m, n))))
             #prev = current
             i= i+1
-            if i==8:
-                break
+            ##if i==8:
+                ##break
         return "failed"
             
             
