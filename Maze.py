@@ -7,8 +7,7 @@ Created on Jan 30, 2021
 import pygame
 import time
 import random
-from collections import deque
-from boto.cloudformation import stack
+
 #Initializing pygame
 pygame.init()
 pygame.mixer.init()
@@ -24,8 +23,9 @@ class Square:
         self.col = col_num
         self.width = dimension // 500
         self.Square_type = square_type
-        self.parent_row = None
-        self.parent_col = None
+        self.parent_row = -1
+        self.parent_col = -1
+        self.visited = False
         self.isStart = row_num == 0 and col_num == 0;
         if self.Square_type == 1:
             self.color = BLACK
@@ -42,7 +42,12 @@ class Square:
     def set_parent(self, parent_row, parent_col):
         self.parent_row = parent_row
         self.parent_col = parent_col
-        
+    def get_parent(self):
+        return self.parent_row, self.parent_col
+    def is_visited(self):
+        return self.visited
+    def set_visited(self):
+        self.visited = True
 class Maze:
     def __init__(self,dimension,pr):
         self.rows = dimension
@@ -106,57 +111,68 @@ class Maze:
                     pygame.draw.rect(screen,GREEN,end_rect)        
                 pygame.display.update()
                 self.x+=20  
+    
+    
+    def is_parent(self, p1, p2, pos):
+        r1, r2 = self.grid[pos].get_pos()
+        
+        if  (r1==p1 and r2==p2):
+            print("not child")
+            return True
+        print("yes, child")
+        return False
+    
+    def add_to_fringe(self, pos, i, j, stack, p1, p2):
+        print("checking (" + str(i) + ", " + str(j) + ")'s child "+ str(pos))
+        if (self.grid[pos].get_type()==0) and (not self.is_parent(p1, p2, pos)) and (self.grid[pos].is_visited() == False): 
+            self.grid[pos].set_parent(i,j)
+            stack.append(self.grid[pos])        
+    
     #function to get fringe from current state located at Square(r,c)
     def get_fringe(self, r, c):
+        p1, p2 = self.grid[(self.cols*r) + c].get_parent()
+        
+        right = (self.cols*r) + c +1
+        left = (self.cols*r) + c - 1
+        top =  (self.cols * (r-1)) + c
+        bottom = (self.cols * (r+1)) + c
         stack = []
+        
         for i in range(0, self.rows):
             for j in range(0, self.cols):
                 if i==r and j==c:
+                    
                     if i==self.rows-1 and j==self.cols-1: #check if its goal state
                         k = (self.cols*i) + j
                         self.grid[k].set_parent(i,j)
                         stack.append(self.grid[k])
                         return stack
+                    
                     if i==0 and j==0:
-                        k = (self.cols*i) + j
-                        if self.grid[k+1].get_type()==0: #right square
-                            self.grid[k+1].set_parent(i,j)
-                            stack.append(self.grid[k+1])
-                        k =  (self.cols * (i+1)) + j
-                        if self.grid[k].get_type() ==0: #bottom square
-                            self.grid[k].set_parent(i,j)
-                            stack.append(self.grid[k])
+                        self.add_to_fringe(right, i, j, stack, p1, p2)
+                        self.add_to_fringe(bottom, i, j, stack, p1, p2)
                         return stack
-                    if i==self.rows-1 and j==self.rows-2:
+                    
+                    if i==self.rows-1 and j==self.cols-2:
                         k = (self.cols*i) + j 
-                        self.grid[k+1].set_parent(i,j)
+                        self.grid[right].set_parent(i,j)
                         stack.append(self.grid[k+1]) #right square that is goal
                         return stack
+                    
                     if j==self.cols -1 and i==self.rows-2:
-                        k =  (self.cols * (i-1)) + j
-                        self.grid[k].set_parent(i,j)
-                        stack.append(self.grid[k])
-                        return stack
-                    if i==0 and j==self.cols-1: #top-right corner so can only go left or bottom here
-                        k = (self.cols*i) + j
-                        if self.grid[k-1].get_type()==0: #left square
-                            self.grid[k-1].set_parent(i,j)
-                            stack.append(self.grid[k-1])
                         k =  (self.cols * (i+1)) + j
-                        if self.grid[k].get_type()==0: #bottom square
-                            self.grid[k].set_parent(i,j)
-                            stack.append(self.grid[k])
+                        self.grid[k].set_parent(i,j)
+                        stack.append(self.grid[k]) #bottom square that is the goal
                         return stack
+                    
+                    if i==0 and j==self.cols-1: #top-right corner so can only go left or bottom here
+                        self.add_to_fringe(left, i, j, stack, p1, p2)
+                        self.add_to_fringe(bottom, i, j, stack, p1, p2)
+                        return stack
+                    
                     if j==0 and i==self.rows-1: #bottom-left corner so can only go top or right here
-                        
-                        k =  (self.cols * (i-1)) + j
-                        if self.grid[k].get_type()==0: #top square
-                            self.grid[k].set_parent(i,j)
-                            stack.append(self.grid[k])
-                        k = (self.cols*i) + j
-                        if self.grid[k+1].get_type()==0: #right square
-                            self.grid[k+1].set_parent(i,j)
-                            stack.append(self.grid[k+1])
+                        self.add_to_fringe(top, i, j, stack, p1, p2)
+                        self.add_to_fringe(right, i, j, stack, p1, p2)
                         return stack
                     
                     #to save an index out of bound exception, 
@@ -165,100 +181,85 @@ class Maze:
                     #when looking for next possible position (children)
                     
                     if i==0 and j>0 and j<self.cols -1:
-                        k = (self.cols*i) + j
-                        if self.grid[k-1].get_type()==0: #left square
-                            self.grid[k-1].set_parent(i,j)
-                            stack.append(self.grid[k-1])
-                        if self.grid[k+1].get_type()==0: #right square
-                            self.grid[k+1].set_parent(i,j)
-                            stack.append(self.grid[k+1])
-                        k =  (self.cols * (i+1)) + j
-                        if self.grid[k].get_type()==0: #bottom square
-                            self.grid[k].set_parent(i,j)
-                            stack.append(self.grid[k])
+                        self.add_to_fringe(left, i, j, stack, p1, p2)
+                        self.add_to_fringe(right, i, j, stack, p1, p2)
+                        self.add_to_fringe(bottom, i, j, stack, p1, p2)
+                        
                     if j==0 and i>0 and i<self.rows -1:
-                        k =  (self.cols * (i-1)) + j
-                        if self.grid[k].get_type()==0: #top square
-                            self.grid[k].set_parent(i,j)
-                            stack.append(self.grid[k])
-                        k = (self.cols*i) + j
-                        if self.grid[k+1].get_type()==0: #right square
-                            self.grid[k+1].set_parent(i,j)
-                            stack.append(self.grid[k+1])
-                        k =  (self.cols * (i+1)) + j
-                        if self.grid[k].get_type()==0: #bottom square
-                            self.grid[k].set_parent(i,j)
-                            stack.append(self.grid[k])
+                        self.add_to_fringe(top, i, j, stack, p1, p2)
+                        self.add_to_fringe(right, i, j, stack, p1, p2)
+                        self.add_to_fringe(bottom, i, j, stack, p1, p2)
                         
                     if i==self.rows -1 and j>0 and j<self.cols-1:
-                        k =  (self.cols * (i-1)) + j
-                        if self.grid[k].get_type()==0: #top square
-                            self.grid[k].set_parent(i,j)
-                            stack.append(self.grid[k])
-                        k = (self.cols*i) + j
-                        if self.grid[k-1].get_type()==0: #left square
-                            self.grid[k-1].set_parent(i,j)
-                            stack.append(self.grid[k-1])
-                        if self.grid[k+1].get_type()==0: #right square
-                            self.grid[k+1].set_parent(i,j)
-                            stack.append(self.grid[k+1])
+                        self.add_to_fringe(top, i, j, stack, p1, p2)
+                        self.add_to_fringe(left, i, j, stack, p1, p2)
+                        self.add_to_fringe(right, i, j, stack, p1, p2)
+                        
                     if j==self.cols -1 and i>0 and i<self.rows-1:
-                        k =  (self.cols * (i-1)) + j
-                        if self.grid[k].get_type()==0: #top square
-                            self.grid[k].set_parent(i,j)
-                            stack.append(self.grid[k])
-                        k = (self.cols*i) + j
-                        if self.grid[k-1].get_type()==0:
-                            self.grid[k-1].set_parent(i,j) #left square
-                            stack.append(self.grid[k-1])
-                        k =  (self.cols * (i+1)) + j
-                        if self.grid[k].get_type()==0: #bottom square
-                            self.grid[k].set_parent(i,j)
-                            stack.append(self.grid[k])
+                        self.add_to_fringe(top, i, j, stack, p1, p2)
+                        self.add_to_fringe(left, i, j, stack, p1, p2)
+                        self.add_to_fringe(bottom, i, j, stack, p1, p2)
                             
                     if i>0 and i<self.rows-1 and j>0 and j<self.cols-1 :
-                        k = (self.cols*i) + j
-                        if self.grid[k-1].get_type()==0: #left square
-                            self.grid[k-1].set_parent(i,j)
-                            stack.append(self.grid[k-1])
-                        
-                        k =  (self.cols * (i-1)) + j
-                        if self.grid[k].get_type()==0: #top square
-                            self.grid[k].set_parent(i,j)
-                            stack.append(self.grid[k])
-                        k = (self.cols*i) + j
-                        if self.grid[k+1].get_type()==0: #right square
-                            self.grid[k+1].set_parent(i,j)
-                            stack.append(self.grid[k+1])
-                        k =  (self.cols * (i+1)) + j
-                        if self.grid[k].get_type()==0: #bottom square
-                            self.grid[k].set_parent(i,j)
-                            stack.append(self.grid[k])
+                        self.add_to_fringe(top, i, j, stack, p1, p2)
+                        self.add_to_fringe(left, i, j, stack, p1, p2)
+                        self.add_to_fringe(right, i, j, stack, p1, p2)
+                        self.add_to_fringe(bottom, i, j, stack, p1, p2)
                     
                     return stack
     
     
-    def dfs(self):   
-        fringe = self.get_fringe(0,0)
+    def dfs(self, fringe, path): 
+        #path = []  
+        #fringe = self.get_fringe(0,0)
+        if (self.grid[1].get_type()==1) and (self.grid[(self.cols*1) + 0].get_type()==1):
+            return "No solution"
+        elif (self.grid[(self.cols * (self.rows-1)) + self.cols -2].get_type()==1) and (self.grid[(self.cols * (self.rows-2)) + self.cols - 1].get_type()==1):
+            return "No solution"
         i = 0;
         
-        while (fringe != []):
-            
+        while (path!=[] or i==0):
+            if(fringe==[]):
+                #temp =
+                #path.pop() #remove the last object with no children
+                if path==[]:
+                    return "No solution"
+                current = path.pop() #go to parent
+                m, n = current.get_pos()
+                fringe = self.get_fringe(m, n)
+                continue
+                
             current = fringe.pop() #current is of type Square
-            print("popped" + str(current.get_pos()))
+            #print("Exploring " + str(current.get_pos()) + "'s children")
             #print(type(current))
+            current.set_visited()
             if current.get_type() == 2: #goal state if Square's type is 2
+                print("i value is "+str(i))
                 return "success, goal reached"
-            m, n = current.get_pos()
-            temp = self.get_fringe(m, n) #temporary list from get_fringe method
-            for k in range(0, len(temp)): #iterate through temp in fifo order and add it to fringe so that peek of fringe is the last element visited in get_fringe
-                fringe.append(temp[k])
             
+            m, n = current.get_pos()
+            position = (self.cols * m) + n
+            path.append(self.grid[position])
+            fringe = self.get_fringe(m, n) #temporary list from get_fringe method
+            #if(temp != []):
+                #for k in range(0, len(temp)): #iterate through temp in fifo order and add it to fringe so that peek of fringe is the last element visited in get_fringe
+                    #fringe.append(temp[k])
+            
+                
+                #if(temp_fringe!=[]):
+                    #for k in range(0, len(temp_fringe)):
+                        #if(temp_fringe[k].get_pos() != temp.get_pos()):
+                            #fringe.append(temp_fringe[k])
+                
+            i= i+1
+            #if i==25:
+                #print("i value is 25")
+                #break
+            #self.dfs(fringe, path)
             #print("idhar"+str(type(self.get_fringe(m, n))))
             #prev = current
-            i= i+1
-            if i==14:
-                break
+            
+        print("i value is 25")
         return "failed"
             
             
@@ -276,8 +277,8 @@ if __name__ == '__main__':
     print()
     #for i in range(0, len(m.grid)):
     #    print(m.grid[i].get_pos())
-    
-    print(m.dfs())
+    m.grid[0].set_parent(0, 0)
+    print(m.dfs(m.get_fringe(0,0),[]))
     ##m.build_maze(probability, screen)
     
     
