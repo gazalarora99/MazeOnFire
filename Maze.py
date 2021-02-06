@@ -121,17 +121,17 @@ class Maze:
         r1, r2 = self.grid[pos].get_pos()
         
         if  (r1==p1 and r2==p2):
-            print("not child")
+            #print("not child")
             return True
         #print("yes, child")
         return False
     
     def add_to_fringe(self, pos, i, j, stack, p1, p2):
-        print("checking (" + str(i) + ", " + str(j) + ")'s child "+ str(pos))
+        #print("checking (" + str(i) + ", " + str(j) + ")'s child "+ str(pos))
         if (self.grid[pos].get_type()==0) and (not self.is_parent(p1, p2, pos)) and (self.grid[pos].is_visited() == False): 
             self.grid[pos].set_parent(i,j)
             stack.append(self.grid[pos]) 
-            print("yes, child")       
+            #print("yes, child")       
     
     #function to get fringe from current state located at Square(r,c)
     def get_fringe(self, r, c):
@@ -212,6 +212,7 @@ class Maze:
                         self.add_to_fringe(bottom, i, j, stack, p1, p2)
                     
                     return stack
+    
     def bfs(self,start_square):
         fringe = deque()
         fringe.appendleft(start_square)
@@ -241,6 +242,7 @@ class Maze:
                     fringe.appendleft(self.grid[right])
                             
             self.grid[(self.cols*r) + c ].set_visited()
+    
     def dfs(self, fringe, path): 
         #path = []  
         #fringe = self.get_fringe(0,0)
@@ -311,7 +313,7 @@ if __name__ == '__main__':
     #    print(m.grid[i].get_pos())
     m.grid[0].set_parent(0, 0)
     m.bfs(m.grid[0])
-   # print(m.dfs(m.get_fringe(0,0),[]))
+    #print(m.dfs(m.get_fringe(0,0),[]))
     ##m.build_maze(probability, screen)
     
     
