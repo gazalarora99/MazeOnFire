@@ -7,7 +7,8 @@ Created on Jan 30, 2021
 import pygame
 import time
 import random
-
+from collections import deque
+from prompt_toolkit.key_binding.bindings.named_commands import self_insert
 #Initializing pygame
 pygame.init()
 pygame.mixer.init()
@@ -48,6 +49,9 @@ class Square:
         return self.visited
     def set_visited(self):
         self.visited = True
+    def is_wall(self):
+        r,c = self.get_pos()
+        return c == 0 or c == self.col -1 or r == 0 or r == self.row -1
 class Maze:
     def __init__(self,dimension,pr):
         self.rows = dimension
@@ -207,8 +211,35 @@ class Maze:
                         self.add_to_fringe(bottom, i, j, stack, p1, p2)
                     
                     return stack
-    
-    
+    def bfs(self,start_square):
+        fringe = deque()
+        fringe.appendleft(start_square)
+        while fringe :
+            curr = fringe.pop()
+            print("Querying: " + str(curr.get_pos()))
+            r,c  = curr.get_pos()
+            right = (self.cols*r) + c +1
+            left = (self.cols*r) + c - 1
+            top =  (self.cols * (r-1)) + c
+            bottom = (self.cols * (r+1)) + c
+            if r is self.rows-1 and c is self.cols - 1:
+                print("Done")
+                return
+            if curr.get_isStart():
+                fringe.appendleft(self.grid[right])
+                fringe.appendleft(self.grid[bottom])
+            else:
+                if curr.is_wall() is False:
+                    if self.grid[top].is_visited() is False:
+                        fringe.appendleft(self.grid[top])
+                if r is not self.rows -1 and self.grid[bottom].is_visited() is False:
+                    fringe.appendleft(self.grid[bottom])
+                if c != 0 and self.grid[left].is_visited() is False:
+                    fringe.appendleft(self.grid[left])    
+                if c is not self.cols - 1 and self.grid[right].is_visited() is False:
+                    fringe.appendleft(self.grid[right])
+                            
+            self.grid[(self.cols*r) + c ].set_visited()
     def dfs(self, fringe, path): 
         #path = []  
         #fringe = self.get_fringe(0,0)
@@ -278,7 +309,8 @@ if __name__ == '__main__':
     #for i in range(0, len(m.grid)):
     #    print(m.grid[i].get_pos())
     m.grid[0].set_parent(0, 0)
-    print(m.dfs(m.get_fringe(0,0),[]))
+    m.bfs(m.grid[0])
+   # print(m.dfs(m.get_fringe(0,0),[]))
     ##m.build_maze(probability, screen)
     
     
