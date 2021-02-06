@@ -119,14 +119,15 @@ class Maze:
         if  (r1==p1 and r2==p2):
             print("not child")
             return True
-        print("yes, child")
+        #print("yes, child")
         return False
     
     def add_to_fringe(self, pos, i, j, stack, p1, p2):
         print("checking (" + str(i) + ", " + str(j) + ")'s child "+ str(pos))
         if (self.grid[pos].get_type()==0) and (not self.is_parent(p1, p2, pos)) and (self.grid[pos].is_visited() == False): 
             self.grid[pos].set_parent(i,j)
-            stack.append(self.grid[pos])        
+            stack.append(self.grid[pos]) 
+            print("yes, child")       
     
     #function to get fringe from current state located at Square(r,c)
     def get_fringe(self, r, c):
@@ -259,7 +260,7 @@ class Maze:
             #print("idhar"+str(type(self.get_fringe(m, n))))
             #prev = current
             
-        print("i value is 25")
+        print("i value is " + str(i))
         return "failed"
             
             
