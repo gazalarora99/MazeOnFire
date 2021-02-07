@@ -8,7 +8,6 @@ import pygame
 import time
 import random
 from collections import deque
-from prompt_toolkit.key_binding.bindings.named_commands import self_insert
 #Initializing pygame
 pygame.init()
 pygame.mixer.init()
@@ -51,7 +50,7 @@ class Square:
         self.visited = True
     def is_wall(self):
         r,c = self.get_pos()
-        return c == 0 or c == self.col -1 or r == 0 or r == self.row -1
+        return c == 0 or c == dimension -1 or r == 0 or r == dimension -1
 class Maze:
     def __init__(self,dimension,pr):
         self.rows = dimension
@@ -216,9 +215,11 @@ class Maze:
     def bfs(self,start_square):
         fringe = deque()
         fringe.appendleft(start_square)
+        i = 0;
         while fringe :
+            i = i + 1
             curr = fringe.pop()
-            print("Querying: " + str(curr.get_pos()))
+            ###print(str(i) + "Querying: " + str(curr.get_pos()))
             r,c  = curr.get_pos()
             right = (self.cols*r) + c +1
             left = (self.cols*r) + c - 1
@@ -230,16 +231,30 @@ class Maze:
             if curr.get_isStart():
                 fringe.appendleft(self.grid[right])
                 fringe.appendleft(self.grid[bottom])
-            else:
-                if curr.is_wall() is False:
-                    if self.grid[top].is_visited() is False:
-                        fringe.appendleft(self.grid[top])
-                if r is not self.rows -1 and self.grid[bottom].is_visited() is False:
-                    fringe.appendleft(self.grid[bottom])
-                if c != 0 and self.grid[left].is_visited() is False:
-                    fringe.appendleft(self.grid[left])    
+            elif curr.is_wall():
+                if c == self.cols -1 and r != self.rows -1 and self.grid[bottom].get_type() == 2:
+                    print("Done")
+                    return
                 if c is not self.cols - 1 and self.grid[right].is_visited() is False:
+                    if self.grid[right] not in fringe :
+                        fringe.appendleft(self.grid[right]) 
+                elif c != 0 and self.grid[left].is_visited() is False:
+                    if self.grid[left] not in fringe :
+                        fringe.appendleft(self.grid[left])    
+                if r is not self.rows -1 and self.grid[bottom].is_visited() is False:
+                    if self.grid[bottom] not in fringe :
+                        fringe.appendleft(self.grid[bottom])    
+                elif r != 0 and self.grid[top].is_visited() is False:
+                    fringe.appendleft(self.grid[top])       
+            else:
+                if self.grid[right].is_visited() is False:
                     fringe.appendleft(self.grid[right])
+                if self.grid[left].is_visited() is False:
+                    fringe.appendleft(self.grid[left]) 
+                if self.grid[bottom].is_visited() is False:
+                    fringe.appendleft(self.grid[bottom])
+                if self.grid[top].is_visited() is False:
+                    fringe.appendleft(self.grid[top])   
                             
             self.grid[(self.cols*r) + c ].set_visited()
     
