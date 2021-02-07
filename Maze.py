@@ -210,7 +210,14 @@ class Maze:
             self.add_to_fringe(bottom, i, j, stack, p1, p2)
         
         return stack
-    
+    def printPath(self,curr_loc):
+        solution = []
+        while self.grid[curr_loc].get_type() != 3:
+            solution.append(self.grid[curr_loc].get_pos())
+            r,c = self.grid[curr_loc].get_parent();
+            curr_loc = (self.cols*r) + c 
+        solution.reverse()
+        print(solution)
     def bfs(self,start_square):
         fringe = deque()
         fringe.appendleft(start_square)
@@ -218,47 +225,62 @@ class Maze:
         while fringe :
             i = i + 1
             curr = fringe.pop()
-            ###print(str(i) + "Querying: " + str(curr.get_pos()))
+            #print(str(i) + "Querying: " + str(curr.get_pos()))
             r,c  = curr.get_pos()
             right = (self.cols*r) + c +1
             left = (self.cols*r) + c - 1
             top =  (self.cols * (r-1)) + c
             bottom = (self.cols * (r+1)) + c
+            curr_loc = (self.cols*r) + c 
             if r == self.rows-1 and c == self.cols - 1:
-                print("Done")
+                self.printPath(curr_loc)
+                ##print(curr.get_parent())
                 return
             if curr.get_isStart():
-                fringe.appendleft(self.grid[right])
-                fringe.appendleft(self.grid[bottom])
+                if self.grid[right].get_type() !=1 :
+                    fringe.appendleft(self.grid[right])
+                    self.grid[right].set_parent(r,c)
+                if self.grid[bottom].get_type() !=1 :    
+                    fringe.appendleft(self.grid[bottom])
+                    self.grid[bottom].set_parent(r,c)
             elif curr.is_wall():
-                if c != self.cols - 1 and self.grid[right].is_visited() is False:
+                if c != self.cols - 1 and self.grid[right].is_visited() is False and self.grid[right].get_type()!= 1:
                     if self.grid[right] not in fringe :
+                        self.grid[right].set_parent(r,c)
                         fringe.appendleft(self.grid[right]) 
-                elif c != 0 and self.grid[left].is_visited() is False:
+                elif c != 0 and self.grid[left].is_visited() is False and self.grid[left].get_type()!= 1:
                     if self.grid[left] not in fringe :
+                        self.grid[left].set_parent(r,c)
                         fringe.appendleft(self.grid[left])    
-                if r != self.rows -1 and self.grid[bottom].is_visited() is False:
+                if r != self.rows -1 and self.grid[bottom].is_visited() is False and self.grid[bottom].get_type()!= 1:
                     if self.grid[bottom] not in fringe :
+                        self.grid[bottom].set_parent(r,c)
                         fringe.appendleft(self.grid[bottom])    
-                elif r != 0 and self.grid[top].is_visited() is False:
+                elif r != 0 and self.grid[top].is_visited() is False and self.grid[top].get_type()!= 2:
                     if self.grid[top] not in fringe :
+                        self.grid[top].set_parent(r,c)
                         fringe.appendleft(self.grid[top])       
             else:
-                if self.grid[right].is_visited() is False:
+                if self.grid[right].get_type()!= 1 and self.grid[right].is_visited() is False:
                     if self.grid[right] not in fringe :
+                        self.grid[right].set_parent(r,c)
                         fringe.appendleft(self.grid[right])
-                if self.grid[left].is_visited() is False:
+                if self.grid[left].get_type()!= 1 and self.grid[left].is_visited() is False:
                     if self.grid[left] not in fringe :
+                        self.grid[left].set_parent(r,c)
                         fringe.appendleft(self.grid[left]) 
-                if self.grid[bottom].is_visited() is False:
+                if self.grid[bottom].get_type()!= 1 and self.grid[bottom].is_visited() is False:
                     if self.grid[bottom] not in fringe :
+                        self.grid[bottom].set_parent(r,c)
                         fringe.appendleft(self.grid[bottom]) 
-                if self.grid[top].is_visited() is False:
+                if self.grid[top].get_type()!= 1 and self.grid[top].is_visited() is False:
                     if self.grid[top] not in fringe :
+                        self.grid[top].set_parent(r,c)
                         fringe.appendleft(self.grid[top])  
                             
             self.grid[(self.cols*r) + c ].set_visited()
-    
+        print("Not Done")
+        return
     def dfs(self, fringe, path): 
         #path = []  
         #fringe = self.get_fringe(0,0)
