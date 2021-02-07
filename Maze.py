@@ -224,23 +224,20 @@ class Maze:
             left = (self.cols*r) + c - 1
             top =  (self.cols * (r-1)) + c
             bottom = (self.cols * (r+1)) + c
-            if r is self.rows-1 and c is self.cols - 1:
+            if r == self.rows-1 and c == self.cols - 1:
                 print("Done")
                 return
             if curr.get_isStart():
                 fringe.appendleft(self.grid[right])
                 fringe.appendleft(self.grid[bottom])
             elif curr.is_wall():
-                if c == self.cols -1 and r != self.rows -1 and self.grid[bottom].get_type() == 2:
-                    print("Done")
-                    return
-                if c is not self.cols - 1 and self.grid[right].is_visited() is False:
+                if c != self.cols - 1 and self.grid[right].is_visited() is False:
                     if self.grid[right] not in fringe :
                         fringe.appendleft(self.grid[right]) 
                 elif c != 0 and self.grid[left].is_visited() is False:
                     if self.grid[left] not in fringe :
                         fringe.appendleft(self.grid[left])    
-                if r is not self.rows -1 and self.grid[bottom].is_visited() is False:
+                if r != self.rows -1 and self.grid[bottom].is_visited() is False:
                     if self.grid[bottom] not in fringe :
                         fringe.appendleft(self.grid[bottom])    
                 elif r != 0 and self.grid[top].is_visited() is False:
