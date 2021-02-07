@@ -245,16 +245,21 @@ class Maze:
                     if self.grid[bottom] not in fringe :
                         fringe.appendleft(self.grid[bottom])    
                 elif r != 0 and self.grid[top].is_visited() is False:
-                    fringe.appendleft(self.grid[top])       
+                    if self.grid[top] not in fringe :
+                        fringe.appendleft(self.grid[top])       
             else:
                 if self.grid[right].is_visited() is False:
-                    fringe.appendleft(self.grid[right])
+                    if self.grid[right] not in fringe :
+                        fringe.appendleft(self.grid[right])
                 if self.grid[left].is_visited() is False:
-                    fringe.appendleft(self.grid[left]) 
+                    if self.grid[left] not in fringe :
+                        fringe.appendleft(self.grid[left]) 
                 if self.grid[bottom].is_visited() is False:
-                    fringe.appendleft(self.grid[bottom])
+                    if self.grid[bottom] not in fringe :
+                        fringe.appendleft(self.grid[bottom]) 
                 if self.grid[top].is_visited() is False:
-                    fringe.appendleft(self.grid[top])   
+                    if self.grid[top] not in fringe :
+                        fringe.appendleft(self.grid[top])  
                             
             self.grid[(self.cols*r) + c ].set_visited()
     
