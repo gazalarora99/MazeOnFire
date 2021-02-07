@@ -141,76 +141,75 @@ class Maze:
         top =  (self.cols * (r-1)) + c
         bottom = (self.cols * (r+1)) + c
         stack = []
+        i = r
+        j = c
         
-        for i in range(0, self.rows):
-            for j in range(0, self.cols):
-                if i==r and j==c:
-                    
-                    if i==self.rows-1 and j==self.cols-1: #check if its goal state
-                        k = (self.cols*i) + j
-                        self.grid[k].set_parent(i,j)
-                        stack.append(self.grid[k])
-                        return stack
-                    
-                    if i==0 and j==0:
-                        self.add_to_fringe(right, i, j, stack, p1, p2)
-                        self.add_to_fringe(bottom, i, j, stack, p1, p2)
-                        return stack
-                    
-                    if i==self.rows-1 and j==self.cols-2:
-                        k = (self.cols*i) + j 
-                        self.grid[right].set_parent(i,j)
-                        stack.append(self.grid[k+1]) #right square that is goal
-                        return stack
-                    
-                    if j==self.cols -1 and i==self.rows-2:
-                        k =  (self.cols * (i+1)) + j
-                        self.grid[k].set_parent(i,j)
-                        stack.append(self.grid[k]) #bottom square that is the goal
-                        return stack
-                    
-                    if i==0 and j==self.cols-1: #top-right corner so can only go left or bottom here
-                        self.add_to_fringe(left, i, j, stack, p1, p2)
-                        self.add_to_fringe(bottom, i, j, stack, p1, p2)
-                        return stack
-                    
-                    if j==0 and i==self.rows-1: #bottom-left corner so can only go top or right here
-                        self.add_to_fringe(top, i, j, stack, p1, p2)
-                        self.add_to_fringe(right, i, j, stack, p1, p2)
-                        return stack
-                    
-                    #to save an index out of bound exception, 
-                    #following if statements will take care of corner Squares
-                    #which may not have a square at either its left or right or top or bottom
-                    #when looking for next possible position (children)
-                    
-                    if i==0 and j>0 and j<self.cols -1:
-                        self.add_to_fringe(left, i, j, stack, p1, p2)
-                        self.add_to_fringe(right, i, j, stack, p1, p2)
-                        self.add_to_fringe(bottom, i, j, stack, p1, p2)
-                        
-                    if j==0 and i>0 and i<self.rows -1:
-                        self.add_to_fringe(top, i, j, stack, p1, p2)
-                        self.add_to_fringe(right, i, j, stack, p1, p2)
-                        self.add_to_fringe(bottom, i, j, stack, p1, p2)
-                        
-                    if i==self.rows -1 and j>0 and j<self.cols-1:
-                        self.add_to_fringe(top, i, j, stack, p1, p2)
-                        self.add_to_fringe(left, i, j, stack, p1, p2)
-                        self.add_to_fringe(right, i, j, stack, p1, p2)
-                        
-                    if j==self.cols -1 and i>0 and i<self.rows-1:
-                        self.add_to_fringe(top, i, j, stack, p1, p2)
-                        self.add_to_fringe(left, i, j, stack, p1, p2)
-                        self.add_to_fringe(bottom, i, j, stack, p1, p2)
-                            
-                    if i>0 and i<self.rows-1 and j>0 and j<self.cols-1 :
-                        self.add_to_fringe(top, i, j, stack, p1, p2)
-                        self.add_to_fringe(left, i, j, stack, p1, p2)
-                        self.add_to_fringe(right, i, j, stack, p1, p2)
-                        self.add_to_fringe(bottom, i, j, stack, p1, p2)
-                    
-                    return stack
+            
+        if i==self.rows-1 and j==self.cols-1: #check if its goal state
+            k = (self.cols*i) + j
+            self.grid[k].set_parent(i,j)
+            stack.append(self.grid[k])
+            return stack
+        
+        if i==0 and j==0:
+            self.add_to_fringe(right, i, j, stack, p1, p2)
+            self.add_to_fringe(bottom, i, j, stack, p1, p2)
+            return stack
+        
+        if i==self.rows-1 and j==self.cols-2:
+            k = (self.cols*i) + j 
+            self.grid[right].set_parent(i,j)
+            stack.append(self.grid[k+1]) #right square that is goal
+            return stack
+        
+        if j==self.cols -1 and i==self.rows-2:
+            k =  (self.cols * (i+1)) + j
+            self.grid[k].set_parent(i,j)
+            stack.append(self.grid[k]) #bottom square that is the goal
+            return stack
+        
+        if i==0 and j==self.cols-1: #top-right corner so can only go left or bottom here
+            self.add_to_fringe(left, i, j, stack, p1, p2)
+            self.add_to_fringe(bottom, i, j, stack, p1, p2)
+            return stack
+        
+        if j==0 and i==self.rows-1: #bottom-left corner so can only go top or right here
+            self.add_to_fringe(top, i, j, stack, p1, p2)
+            self.add_to_fringe(right, i, j, stack, p1, p2)
+            return stack
+        
+        #to save an index out of bound exception, 
+        #following if statements will take care of corner Squares
+        #which may not have a square at either its left or right or top or bottom
+        #when looking for next possible position (children)
+        
+        if i==0 and j>0 and j<self.cols -1:
+            self.add_to_fringe(left, i, j, stack, p1, p2)
+            self.add_to_fringe(right, i, j, stack, p1, p2)
+            self.add_to_fringe(bottom, i, j, stack, p1, p2)
+            
+        if j==0 and i>0 and i<self.rows -1:
+            self.add_to_fringe(top, i, j, stack, p1, p2)
+            self.add_to_fringe(right, i, j, stack, p1, p2)
+            self.add_to_fringe(bottom, i, j, stack, p1, p2)
+            
+        if i==self.rows -1 and j>0 and j<self.cols-1:
+            self.add_to_fringe(top, i, j, stack, p1, p2)
+            self.add_to_fringe(left, i, j, stack, p1, p2)
+            self.add_to_fringe(right, i, j, stack, p1, p2)
+            
+        if j==self.cols -1 and i>0 and i<self.rows-1:
+            self.add_to_fringe(top, i, j, stack, p1, p2)
+            self.add_to_fringe(left, i, j, stack, p1, p2)
+            self.add_to_fringe(bottom, i, j, stack, p1, p2)
+                
+        if i>0 and i<self.rows-1 and j>0 and j<self.cols-1 :
+            self.add_to_fringe(top, i, j, stack, p1, p2)
+            self.add_to_fringe(left, i, j, stack, p1, p2)
+            self.add_to_fringe(right, i, j, stack, p1, p2)
+            self.add_to_fringe(bottom, i, j, stack, p1, p2)
+        
+        return stack
     
     def bfs(self,start_square):
         fringe = deque()
@@ -266,9 +265,14 @@ class Maze:
     def dfs(self, fringe, path): 
         #path = []  
         #fringe = self.get_fringe(0,0)
+        t1=time.time()
         if (self.grid[1].get_type()==1) and (self.grid[(self.cols*1) + 0].get_type()==1):
+            t2 = time.time()
+            print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
             return "No solution"
         elif (self.grid[(self.cols * (self.rows-1)) + self.cols -2].get_type()==1) and (self.grid[(self.cols * (self.rows-2)) + self.cols - 1].get_type()==1):
+            t2 = time.time()
+            print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
             return "No solution"
         i = 0;
         
@@ -277,6 +281,8 @@ class Maze:
                 #temp =
                 #path.pop() #remove the last object with no children
                 if path==[]:
+                    t2 = time.time()
+                    print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
                     return "No solution"
                 current = path.pop() #go to parent
                 m, n = current.get_pos()
@@ -289,6 +295,8 @@ class Maze:
             current.set_visited()
             if current.get_type() == 2: #goal state if Square's type is 2
                 print("i value is "+str(i))
+                t2 = time.time()
+                print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
                 return "success, goal reached"
             
             m, n = current.get_pos()
@@ -312,7 +320,8 @@ class Maze:
             #self.dfs(fringe, path)
             #print("idhar"+str(type(self.get_fringe(m, n))))
             #prev = current
-            
+        t2 = time.time()
+        print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))    
         print("i value is " + str(i))
         return "failed"
             
