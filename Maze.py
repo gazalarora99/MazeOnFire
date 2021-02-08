@@ -7,6 +7,7 @@ Created on Jan 30, 2021
 import pygame
 import time
 import random
+import heapq
 from collections import deque
 #Initializing pygame
 pygame.init()
@@ -26,6 +27,8 @@ class Square:
         self.parent_row = -1
         self.parent_col = -1
         self.visited = False
+        self.current_dist = 0
+        self.heuristic = self.current_dist + (dimension - 1 - self.row) + (dimension - 1 - self.col)
         self.isStart = row_num == 0 and col_num == 0;
         if self.Square_type == 1:
             self.color = BLACK
@@ -48,9 +51,17 @@ class Square:
         return self.visited
     def set_visited(self):
         self.visited = True
+    def set_distance(self, n):
+        self.current_dist = n
+        self.heuristic = n + (dimension - 1 - self.row) + (dimension - 1 - self.col)
+        #print(f'{heuristic}')
     def is_wall(self):
         r,c = self.get_pos()
-        return c == 0 or c == dimension -1 or r == 0 or r == dimension -1
+        return c == 0 or c == dimension - 1 or r == 0 or r == dimension - 1
+    def __lt__(self, other):
+        return self.heuristic < other.heuristic
+    def __str__(self):
+        return str("({} , {}) : dist {}".format(self.row, self.col, self.heuristic))
 class Maze:
     def __init__(self,dimension,pr):
         self.rows = dimension
@@ -210,6 +221,7 @@ class Maze:
             self.add_to_fringe(bottom, i, j, stack, p1, p2)
         
         return stack
+    
     def printPath(self,curr_loc):
         solution = []
         while self.grid[curr_loc].get_type() != 3:
@@ -218,13 +230,99 @@ class Maze:
             curr_loc = (self.cols*r) + c 
         solution.reverse()
         print(solution)
+    
+    def a_star(self, start_square):
+        
+        t1=time.time()
+        fringe = []
+        heapq.heappush(fringe, start_square)
+        i = 0
+        while fringe :
+            i = i + 1
+            curr = heapq.heappop(fringe)
+            curr.set_visited()
+            r,c  = curr.get_pos()
+            p1, p2 = curr.get_parent()
+            #curr.set_distance(self.grid[(self.cols*p1) + p2].current_dist + 1)
+            #print("dist = " + str(curr.current_dist) + ", heur = " + str(curr.heuristic) + ", r = " + str(r) + ", c = " + str(c))
+            print(curr.__str__())
+            right = (self.cols*r) + c + 1
+            left = (self.cols*r) + c - 1
+            top =  (self.cols * (r-1)) + c
+            bottom = (self.cols * (r+1)) + c
+            curr_loc = (self.cols*r) + c 
+            
+            if r == self.rows-1 and c == self.cols - 1:
+                #self.printPath(curr_loc)
+                t2 = time.time()
+                print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
+                print("success, goal reached")
+                return
+            
+            if curr.get_isStart():
+                if self.grid[right].get_type() == 0 :
+                    self.grid[right].set_distance(1)
+                    self.grid[right].set_parent(r,c)
+                    heapq.heappush(fringe, self.grid[right])
+                    #print(f'{self.grid[right].current_dist}')
+                    
+                if self.grid[bottom].get_type() == 0 : 
+                    self.grid[bottom].set_distance(1)
+                    self.grid[bottom].set_parent(r,c)
+                    heapq.heappush(fringe, self.grid[bottom])
+                    #print(f'{self.grid[bottom].current_dist}')
+                    
+            elif curr.is_wall():
+                if (c != self.cols - 1) and (self.grid[right].is_visited() is False) and (self.grid[right].get_type() != 1) and (self.is_parent(p1, p2, right) is False):
+                    self.grid[right].set_distance(self.grid[curr_loc].current_dist + 1)
+                    self.grid[right].set_parent(r,c)
+                    heapq.heappush(fringe, self.grid[right]) 
+                elif (c != 0) and (self.grid[left].is_visited() is False) and (self.grid[left].get_type()==0) and (self.is_parent(p1, p2, left) is False):
+                    self.grid[left].set_distance(self.grid[curr_loc].current_dist + 1)
+                    self.grid[left].set_parent(r,c)
+                    heapq.heappush(fringe, self.grid[left])     
+                if (r != self.rows -1) and (self.grid[bottom].is_visited() is False) and (self.grid[bottom].get_type()!=1) and (self.is_parent(p1, p2, bottom) is False):
+                    self.grid[bottom].set_distance(self.grid[curr_loc].current_dist + 1)
+                    self.grid[bottom].set_parent(r,c)
+                    heapq.heappush(fringe, self.grid[bottom])    
+                elif (r != 0) and (self.grid[top].is_visited() is False) and (self.grid[top].get_type()==0) and (self.is_parent(p1, p2, top) is False):
+                    self.grid[top].set_distance(self.grid[curr_loc].current_dist + 1)
+                    self.grid[top].set_parent(r,c)
+                    heapq.heappush(fringe, self.grid[top])         
+            else:
+                if (self.grid[right].get_type()==0) and (self.grid[right].is_visited() is False) and (self.is_parent(p1, p2, right) is False):
+                    self.grid[right].set_distance(self.grid[curr_loc].current_dist + 1)
+                    self.grid[right].set_parent(r,c)
+                    heapq.heappush(fringe, self.grid[right]) 
+                if (self.grid[bottom].get_type()==0) and (self.grid[bottom].is_visited() is False) and (self.is_parent(p1, p2, bottom) is False):
+                    self.grid[bottom].set_distance(self.grid[curr_loc].current_dist + 1)
+                    self.grid[bottom].set_parent(r,c)
+                    heapq.heappush(fringe, self.grid[bottom])  
+                if (self.grid[left].get_type()==0) and (self.grid[left].is_visited() is False) and (self.is_parent(p1, p2, left) is False):
+                    self.grid[left].set_distance(self.grid[curr_loc].current_dist + 1)
+                    self.grid[left].set_parent(r,c)
+                    heapq.heappush(fringe, self.grid[left])
+                if (self.grid[top].get_type()==0) and (self.grid[top].is_visited() is False) and (self.is_parent(p1, p2, top) is False):
+                    self.grid[top].set_distance(self.grid[curr_loc].current_dist + 1)
+                    self.grid[top].set_parent(r,c)
+                    heapq.heappush(fringe, self.grid[top])  
+                         
+        t2 = time.time()
+        print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
+        print("Not Done")
+        return    
+                    
+                        
+            
     def bfs(self,start_square):
+        t1=time.time()
         fringe = deque()
         fringe.appendleft(start_square)
-        i = 0;
+        i = 0
         while fringe :
             i = i + 1
             curr = fringe.pop()
+            #need to set curr.set_visited() here
             #print(str(i) + "Querying: " + str(curr.get_pos()))
             r,c  = curr.get_pos()
             right = (self.cols*r) + c +1
@@ -233,8 +331,10 @@ class Maze:
             bottom = (self.cols * (r+1)) + c
             curr_loc = (self.cols*r) + c 
             if r == self.rows-1 and c == self.cols - 1:
-                self.printPath(curr_loc)
-                ##print(curr.get_parent())
+                #self.printPath(curr_loc)
+                t2 = time.time()
+                print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
+                print("done")
                 return
             if curr.get_isStart():
                 if self.grid[right].get_type() !=1 :
@@ -279,8 +379,12 @@ class Maze:
                         fringe.appendleft(self.grid[top])  
                             
             self.grid[(self.cols*r) + c ].set_visited()
+        t2 = time.time()
+        print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
         print("Not Done")
         return
+    
+    
     def dfs(self, fringe, path): 
         #path = []  
         #fringe = self.get_fringe(0,0)
@@ -360,8 +464,9 @@ if __name__ == '__main__':
     #for i in range(0, len(m.grid)):
     #    print(m.grid[i].get_pos())
     m.grid[0].set_parent(0, 0)
-    m.bfs(m.grid[0])
-    #print(m.dfs(m.get_fringe(0,0),[]))
+    #m.bfs(m.grid[0])
+    m.a_star(m.grid[0])
+    #print(m.dfs(m.get_fringe(0,0), []))
     ##m.build_maze(probability, screen)
     
     
