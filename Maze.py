@@ -135,6 +135,7 @@ class Maze:
         x = random.uniform(0, dim-1)
         y = random.uniform(0, dim-1)
         self.grid[(self.cols * x)+y]._set_type(4)
+        return x, y
     
     def is_parent(self, p1, p2, pos):
         r1, r2 = self.grid[pos].get_pos()
@@ -278,6 +279,8 @@ class Maze:
                 print("success, goal reached")
                 return "done"
             
+            
+            
             if curr.get_isStart():
                 if self.grid[right].get_type() == 0 :
                     self.grid[right].set_distance(1)
@@ -341,7 +344,9 @@ class Maze:
                     
                         
             
-    def bfs(self,start_square):
+    def bfs(self, start_square, fire_row, fire_col):
+        
+        
         t1=time.time()
         if (self.grid[1].get_type()==1) and (self.grid[(self.cols*1) + 0].get_type()==1):
             t2 = time.time()
@@ -371,7 +376,12 @@ class Maze:
                 t2 = time.time()
                 print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
                 print("done")
-                return
+                return 0
+            
+            if r == fire_row and c == fire_col:
+                print("path exists from start to fire")
+                return 1
+            
             if curr.get_isStart():
                 if self.grid[right].get_type() !=1 :
                     fringe.appendleft(self.grid[right])
@@ -380,7 +390,7 @@ class Maze:
                     fringe.appendleft(self.grid[bottom])
                     self.grid[bottom].set_parent(r,c)
             elif curr.is_wall():
-                if c != self.cols - 1 and self.grid[right].is_visited() is False and self.grid[right].get_type()!= 1:
+                if c != self.cols - 1 and self.grid[right].is_visited() is False and (self.grid[right].get_type()== 0 or self.grid[right].get_type()== 2):
                     if self.grid[right] not in fringe :
                         self.grid[right].set_parent(r,c)
                         fringe.appendleft(self.grid[right]) 
@@ -388,7 +398,7 @@ class Maze:
                     if self.grid[left] not in fringe :
                         self.grid[left].set_parent(r,c)
                         fringe.appendleft(self.grid[left])    
-                if r != self.rows -1 and self.grid[bottom].is_visited() is False and self.grid[bottom].get_type()!= 1:
+                if r != self.rows -1 and self.grid[bottom].is_visited() is False and (self.grid[bottom].get_type()== 0 or self.grid[bottom].get_type()==2):
                     if self.grid[bottom] not in fringe :
                         self.grid[bottom].set_parent(r,c)
                         fringe.appendleft(self.grid[bottom])    
@@ -418,7 +428,7 @@ class Maze:
         t2 = time.time()
         print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
         print("Not Done")
-        return
+        return 2
     
     
     def dfs(self, fringe, path): 
@@ -497,12 +507,14 @@ if __name__ == '__main__':
     m = Maze(dimension,probability)
     ##screen = pygame.display.set_mode((500, 500))
     m.populate_grid(dimension, probability)
-    m.create_fire(dimension)
+    fire_row, fire_col = m.create_fire(dimension)
+   
+    
     print()
     #for i in range(0, len(m.grid)):
     #    print(m.grid[i].get_pos())
     m.grid[0].set_parent(0, 0)
-    #m.bfs(m.grid[0])
+    #m.bfs(m.grid[0], fire_row, fire_col)
     print(m.a_star(m.grid[0]))
     #print(m.dfs(m.get_fringe(0,0), []))
     ##m.build_maze(probability, screen)
