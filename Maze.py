@@ -240,6 +240,7 @@ class Maze:
             curr_loc = (self.cols*r) + c 
         solution.reverse()
         print(solution)
+        return solution
     
     def a_star(self, start_square):
         
