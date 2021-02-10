@@ -56,6 +56,8 @@ class Square:
         self.current_dist = n
         self.heuristic = n + sqrt(((dimension - 1 - self.row)**2) + ((dimension - 1 - self.col)**2))
         #print(f'{heuristic}')
+    def set_type(self, n):
+        self.Square_type = n
     def is_wall(self):
         r,c = self.get_pos()
         return c == 0 or c == dimension - 1 or r == 0 or r == dimension - 1
@@ -129,6 +131,10 @@ class Maze:
                 pygame.display.update()
                 self.x+=20  
     
+    def create_fire(self, dim):
+        x = random.uniform(0, dim-1)
+        y = random.uniform(0, dim-1)
+        self.grid[(self.cols * x)+y]._set_type(4)
     
     def is_parent(self, p1, p2, pos):
         r1, r2 = self.grid[pos].get_pos()
@@ -486,10 +492,12 @@ class Maze:
 if __name__ == '__main__':
     dimension = int(input("Enter Dimension: "))
     probability = float(input("Enter Probability: "))
+    flammability = float(input("Enter Flammability rate: "))
     
     m = Maze(dimension,probability)
     ##screen = pygame.display.set_mode((500, 500))
     m.populate_grid(dimension, probability)
+    m.create_fire(dimension)
     print()
     #for i in range(0, len(m.grid)):
     #    print(m.grid[i].get_pos())
