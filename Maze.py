@@ -189,8 +189,7 @@ class Maze:
         for pair in fire_list:
             i,j = pair
             curr = (self.cols*i) + j 
-            self.grid[curr].set_type(4)
-        return fire_list                                           
+            self.grid[curr].set_type(4)                                         
     def is_parent(self, p1, p2, pos):
         r1, r2 = self.grid[pos].get_pos()
         
@@ -293,7 +292,7 @@ class Maze:
             r,c = self.grid[curr_loc].get_parent();
             curr_loc = (self.cols*r) + c 
         solution.reverse()
-        #print(solution)
+        print(solution)
         return solution
     
     
@@ -506,20 +505,24 @@ class Maze:
             path = self.printPath(end, (self.cols * r1) + c1 )
         return "agent has no path left to the end"
     
-    def strategy1(self, fire_row, fire_col, dim, q):
-        x = self.bfs(self.grid[0], fire_row, fire_col,1)
+    def strategy1(self,dim, q):
+        x = self.bfs(self.grid[0],-1,-1,1)
+        fire_row, fire_col = m.create_fire(dim)
         end = (self.cols * (dim - 1)) + (dim - 1)
         path = self.printPath(end, 0)
         if(x==0):
             while(path!=[]):
                 r1, c1 = self.agent_moves(path)
                 path.pop(0)
-                fire_lst = self.advance_fire(q)
+                curr_loc = (self.cols*r1) + c1
+                self.advance_fire(q)
                 print()
                 self.print_grid()
                 if (r1==dim-1) and (c1==dim-1):
                     return "goal reached"
-                if (r1,c1) in fire_lst:
+                if self.grid[curr_loc].get_type()== 4:
+                    print("on" + str(curr_loc))
+                    print("Tu jaal gya bc")
                     return "agent's current loc caught fire"
         return "agent has no path to the end"
         
@@ -600,10 +603,10 @@ if __name__ == '__main__':
     m = Maze(dimension,probability)
     ##screen = pygame.display.set_mode((500, 500))
     m.populate_grid(dimension, probability)
-    fire_row, fire_col = m.create_fire(dimension)
-   # m.bfs(m.grid[0], fire_row, fire_col, 1)
+    #x = m.bfs(m.grid[0],fire_row, fire_col,1)
+    #fire_row, fire_col = m.create_fire(dimension)
    # m.advance_fire(flammability)
-    print(m.strategy1(fire_row, fire_col, dimension, flammability))
+    print(m.strategy1(dimension, flammability))
     #m.print_grid()
     print()
     #print(m.strategy1(fire_row, fire_col, dimension, flammability))
