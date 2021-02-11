@@ -150,6 +150,7 @@ class Maze:
         y = random.randint(0, dim-1)
         self.grid[(self.cols * x)+y].set_type(4)
         return x, y
+    
     def advance_fire(self,q):
         fire_list=[]
         for Square in self.grid:
@@ -485,7 +486,39 @@ class Maze:
         print("Not Done")
         return 2
     
+    def agent_moves(self, path):
+        r, c = path[0]
+        return r, c
     
+    def strategy2(self, fire_row, fire_col, dim, q):
+        x = self.bfs(self.grid[0], fire_row, fire_col)
+        end = (self.cols * (dim - 1)) + (dim - 1)
+        path = self.printPath(end, 0)
+        while(x!=2):
+            r1, c1 = self.agent_moves(path)
+            r2, c2 = self.advance_fire(q)
+            if (r1==dim-1) and (c1==dim-1):
+                return "goal reached"
+            if (r1==r2) and (c1==c2):
+                return "agent's current loc caught fire"
+            x = self.bfs (self.grid[ (self.cols * r1) + c1], fire_row, fire_col)
+            path = self.printPath(end, (self.cols * r1) + c1 )
+        return "agent has no path left to the end"
+    
+    def strategy1(self, fire_row, fire_col, dim, q):
+        x = self.bfs(self.grid[0], fire_row, fire_col)
+        end = (self.cols * (dim - 1)) + (dim - 1)
+        path = self.printPath(end, 0)
+        if(x!=2):
+            while(path!=[]):
+                r1, c1 = self.agent_moves(path)
+                path.pop(0)
+                r2, c2 = self.advance_fire(q)
+                if (r1==dim-1) and (c1==dim-1):
+                    return "goal reached"
+                if (r1==r2) and (c1==c2):
+                    return "agent's current loc caught fire"
+        return "agent has no path to the end"
         
     
     def dfs(self, fringe, path): 
