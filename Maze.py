@@ -190,7 +190,7 @@ class Maze:
             i,j = pair
             curr = (self.cols*i) + j 
             self.grid[curr].set_type(4)
-                                                   
+        return fire_list                                           
     def is_parent(self, p1, p2, pos):
         r1, r2 = self.grid[pos].get_pos()
         
@@ -293,7 +293,7 @@ class Maze:
             r,c = self.grid[curr_loc].get_parent();
             curr_loc = (self.cols*r) + c 
         solution.reverse()
-        print(solution)
+        #print(solution)
         return solution
     
     
@@ -399,8 +399,9 @@ class Maze:
         return    
                     
                         
-            
-    def bfs(self, start_square, fire_row, fire_col):
+            ##mode = 1 for start to end
+            # mode = 2 for start to fire  
+    def bfs(self, start_square, fire_row, fire_col,mode):
         
         
         t1=time.time()
@@ -427,14 +428,14 @@ class Maze:
             top =  (self.cols * (r-1)) + c
             bottom = (self.cols * (r+1)) + c
             curr_loc = (self.cols*r) + c 
-            if r == self.rows-1 and c == self.cols - 1:
+            if mode == 1 and r == self.rows-1 and c == self.cols - 1:
                 #self.printPath(curr_loc)
                 t2 = time.time()
                 print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
                 print("done")
                 return 0
             
-            if r == fire_row and c == fire_col:
+            if mode == 2 and r == fire_row and c == fire_col:
                 print("path exists from start to fire")
                 return 1
             
@@ -506,21 +507,23 @@ class Maze:
         return "agent has no path left to the end"
     
     def strategy1(self, fire_row, fire_col, dim, q):
-        x = self.bfs(self.grid[0], fire_row, fire_col)
+        x = self.bfs(self.grid[0], fire_row, fire_col,1)
         end = (self.cols * (dim - 1)) + (dim - 1)
         path = self.printPath(end, 0)
-        if(x!=2):
+        if(x==0):
             while(path!=[]):
                 r1, c1 = self.agent_moves(path)
                 path.pop(0)
-                r2, c2 = self.advance_fire(q)
+                fire_lst = self.advance_fire(q)
+                print()
+                self.print_grid()
                 if (r1==dim-1) and (c1==dim-1):
                     return "goal reached"
-                if (r1==r2) and (c1==c2):
+                if (r1,c1) in fire_lst:
                     return "agent's current loc caught fire"
         return "agent has no path to the end"
         
-    
+        
     def dfs(self, fringe, path): 
         #path = []  
         #fringe = self.get_fringe(0,0)
@@ -598,13 +601,11 @@ if __name__ == '__main__':
     ##screen = pygame.display.set_mode((500, 500))
     m.populate_grid(dimension, probability)
     fire_row, fire_col = m.create_fire(dimension)
+    m.bfs(m.grid[0], fire_row, fire_col,2)
+   # m.advance_fire(flammability)
     m.print_grid()
-    m.advance_fire(flammability)
     print()
-    m.print_grid()
-    m.advance_fire(flammability)
-    print()
-    m.print_grid()
+    print(m.strategy1(fire_row, fire_col, dimension, flammability))
     #print()
     #for i in range(0, len(m.grid)):
     #    print(m.grid[i].get_pos())
