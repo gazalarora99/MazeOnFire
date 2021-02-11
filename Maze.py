@@ -132,9 +132,9 @@ class Maze:
                 self.x+=20  
     
     def create_fire(self, dim):
-        x = random.uniform(0, dim-1)
-        y = random.uniform(0, dim-1)
-        self.grid[(self.cols * x)+y]._set_type(4)
+        x = random.randint(0, dim-1)
+        y = random.randint(0, dim-1)
+        self.grid[(self.cols * x)+y].set_type(4)
         return x, y
     
     def is_parent(self, p1, p2, pos):
@@ -232,15 +232,16 @@ class Maze:
         
         return stack
     
-    def printPath(self,curr_loc):
+    def printPath(self,curr_loc, start_square):
         solution = []
-        while self.grid[curr_loc].get_type() != 3:
+        while curr_loc != start_square:
             solution.append(self.grid[curr_loc].get_pos())
             r,c = self.grid[curr_loc].get_parent();
             curr_loc = (self.cols*r) + c 
         solution.reverse()
         print(solution)
         return solution
+    
     
     def a_star(self, start_square):
         
@@ -431,6 +432,8 @@ class Maze:
         print("Not Done")
         return 2
     
+    
+        
     
     def dfs(self, fringe, path): 
         #path = []  
