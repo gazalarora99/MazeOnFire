@@ -70,6 +70,20 @@ class Maze:
         self.rows = dimension
         self.cols = dimension
         self.grid = []
+    def print_grid(self):
+        for i in range(0,self.rows):
+            print()
+            for j in range(0,self.cols):
+                if self.grid[(self.cols * i) + j].get_type() == 3:
+                    print("S", end = " ")
+                elif self.grid[(self.cols*i) + j].get_type() == 0:
+                    print("_", end = " ")
+                elif self.grid[(self.cols*i) + j].get_type() == 1:
+                    print("@", end = " ")
+                elif self.grid[(self.cols*i) + j].get_type() == 4:
+                    print("F", end = " ")      
+                elif self.grid[(self.cols*i) + j].get_type() == 2:
+                    print("E", end = " ")                           
     ### makes 2d array with given dimensions and has square objects in it.
     def populate_grid(self,dimension,pr):
         
@@ -136,7 +150,46 @@ class Maze:
         y = random.randint(0, dim-1)
         self.grid[(self.cols * x)+y].set_type(4)
         return x, y
-    
+    def advance_fire(self,q):
+        fire_list=[]
+        for Square in self.grid:
+            r,c = Square.get_pos()
+            right = (self.cols*r) + c +1
+            left = (self.cols*r) + c - 1
+            top =  (self.cols * (r-1)) + c
+            bottom = (self.cols * (r+1)) + c
+            k = 0;
+            if Square.get_type() != 4 and Square.get_type() != 1:
+                if Square.is_wall():
+                    if r != self.rows -1:
+                        if self.grid[bottom].get_type() == 4:
+                            k = k+1
+                    elif r != 0:
+                        if self.grid[top].get_type() ==4:
+                            k = k+1
+                    if c != 0:
+                        if self.grid[left].get_type() == 4:
+                            k = k+1
+                    elif c != self.cols:
+                        if self.grid[right].get_type() == 4:
+                            k = k+1
+                else:
+                    if self.grid[top].get_type() == 4:
+                        k = k+1
+                    if self.grid[left].get_type() == 4:
+                        k = k+1
+                    if self.grid[right].get_type() ==4:
+                        k = k+1
+                    if self.grid[bottom].get_type() == 4:
+                        k = k+1
+                prob = 1 - (1 - q)**k
+                if random.uniform(0,1) <= prob:
+                    fire_list.append(Square.get_pos())
+        for pair in fire_list:
+            i,j = pair
+            curr = (self.cols*i) + j 
+            self.grid[curr].set_type(4)
+                                                   
     def is_parent(self, p1, p2, pos):
         r1, r2 = self.grid[pos].get_pos()
         
@@ -512,14 +565,19 @@ if __name__ == '__main__':
     ##screen = pygame.display.set_mode((500, 500))
     m.populate_grid(dimension, probability)
     fire_row, fire_col = m.create_fire(dimension)
-   
-    
+    m.print_grid()
+    m.advance_fire(flammability)
     print()
+    m.print_grid()
+    m.advance_fire(flammability)
+    print()
+    m.print_grid()
+    #print()
     #for i in range(0, len(m.grid)):
     #    print(m.grid[i].get_pos())
-    m.grid[0].set_parent(0, 0)
+    #m.grid[0].set_parent(0, 0)
     #m.bfs(m.grid[0], fire_row, fire_col)
-    print(m.a_star(m.grid[0]))
+    #print(m.a_star(m.grid[0]))
     #print(m.dfs(m.get_fringe(0,0), []))
     ##m.build_maze(probability, screen)
     
