@@ -10,6 +10,7 @@ import random
 import heapq
 from collections import deque
 from math import sqrt
+from conda.common._logic import FALSE
 #Initializing pygame
 pygame.init()
 pygame.mixer.init()
@@ -407,11 +408,11 @@ class Maze:
         if (self.grid[1].get_type()==1) and (self.grid[(self.cols*1) + 0].get_type()==1):
             t2 = time.time()
             print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
-            return "No solution"
+            return 2
         elif (self.grid[(self.cols * (self.rows-1)) + self.cols -2].get_type()==1) and (self.grid[(self.cols * (self.rows-2)) + self.cols - 1].get_type()==1):
             t2 = time.time()
             print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
-            return "No solution"
+            return 2
         
         fringe = deque()
         fringe.appendleft(start_square)
@@ -450,7 +451,7 @@ class Maze:
                     if self.grid[right] not in fringe :
                         self.grid[right].set_parent(r,c)
                         fringe.appendleft(self.grid[right]) 
-                elif c != 0 and self.grid[left].is_visited() is False and self.grid[left].get_type()!= 1:
+                elif c != 0 and self.grid[left].is_visited() is False and self.grid[left].get_type()== 0:
                     if self.grid[left] not in fringe :
                         self.grid[left].set_parent(r,c)
                         fringe.appendleft(self.grid[left])    
@@ -458,24 +459,24 @@ class Maze:
                     if self.grid[bottom] not in fringe :
                         self.grid[bottom].set_parent(r,c)
                         fringe.appendleft(self.grid[bottom])    
-                elif r != 0 and self.grid[top].is_visited() is False and self.grid[top].get_type()!= 2:
+                elif r != 0 and self.grid[top].is_visited() is False and self.grid[top].get_type()==0:
                     if self.grid[top] not in fringe :
                         self.grid[top].set_parent(r,c)
                         fringe.appendleft(self.grid[top])       
             else:
-                if self.grid[right].get_type()!= 1 and self.grid[right].is_visited() is False:
+                if self.grid[right].get_type()== 0 and self.grid[right].is_visited() is False:
                     if self.grid[right] not in fringe :
                         self.grid[right].set_parent(r,c)
                         fringe.appendleft(self.grid[right])
-                if self.grid[left].get_type()!= 1 and self.grid[left].is_visited() is False:
+                if self.grid[left].get_type()== 0 and self.grid[left].is_visited() is False:
                     if self.grid[left] not in fringe :
                         self.grid[left].set_parent(r,c)
                         fringe.appendleft(self.grid[left]) 
-                if self.grid[bottom].get_type()!= 1 and self.grid[bottom].is_visited() is False:
+                if self.grid[bottom].get_type()== 0 and self.grid[bottom].is_visited() is False:
                     if self.grid[bottom] not in fringe :
                         self.grid[bottom].set_parent(r,c)
                         fringe.appendleft(self.grid[bottom]) 
-                if self.grid[top].get_type()!= 1 and self.grid[top].is_visited() is False:
+                if self.grid[top].get_type()== 0 and self.grid[top].is_visited() is False:
                     if self.grid[top] not in fringe :
                         self.grid[top].set_parent(r,c)
                         fringe.appendleft(self.grid[top])  
@@ -486,23 +487,43 @@ class Maze:
         print("Not Done")
         return 2
     
+    def clear_visited(self):
+        for i in self.grid:
+            if (i.is_visited()):
+                i.visited = False 
+                
+    
     def agent_moves(self, path):
         r, c = path[0]
         return r, c
     
-    def strategy2(self, fire_row, fire_col, dim, q):
-        x = self.bfs(self.grid[0], fire_row, fire_col)
+    def strategy2(self, dim, q):
+        x = self.bfs(self.grid[0], -1, -1, 1)
+        fire_row, fire_col = m.create_fire(dim)
         end = (self.cols * (dim - 1)) + (dim - 1)
-        path = self.printPath(end, 0)
-        while(x!=2):
+        path = None
+        if(x==0):
+            path = self.printPath(end, 0)
+        
+        while(x==0):
+            self.clear_visited()
             r1, c1 = self.agent_moves(path)
-            r2, c2 = self.advance_fire(q)
+            #path.pop(0)
+            curr_loc = (self.cols*r1) + c1
+            self.advance_fire(q)
+            print()
+            self.print_grid()
             if (r1==dim-1) and (c1==dim-1):
                 return "goal reached"
-            if (r1==r2) and (c1==c2):
-                return "agent's current loc caught fire"
-            x = self.bfs (self.grid[ (self.cols * r1) + c1], fire_row, fire_col)
-            path = self.printPath(end, (self.cols * r1) + c1 )
+            if (self.grid[end].get_type()==4):
+                return "goal is on fire"
+            if self.grid[curr_loc].get_type()== 4:
+                    print("on" + str(curr_loc))
+                    print("Tu jaal gya bc")
+                    return "agent's current loc caught fire"
+            x = self.bfs (self.grid[ (self.cols * r1) + c1 ], -1, -1, 1)
+            if(x==0):
+                path = self.printPath(end, (self.cols * r1) + c1 )
         return "agent has no path left to the end"
     
     def strategy1(self,dim, q):
@@ -510,6 +531,7 @@ class Maze:
         fire_row, fire_col = m.create_fire(dim)
         end = (self.cols * (dim - 1)) + (dim - 1)
         path = self.printPath(end, 0)
+        self.clear_visited()
         if(x==0):
             while(path!=[]):
                 r1, c1 = self.agent_moves(path)
@@ -520,6 +542,8 @@ class Maze:
                 self.print_grid()
                 if (r1==dim-1) and (c1==dim-1):
                     return "goal reached"
+                if (self.grid[end].get_type()==4):
+                    return "goal is on fire"
                 if self.grid[curr_loc].get_type()== 4:
                     print("on" + str(curr_loc))
                     print("Tu jaal gya bc")
@@ -606,7 +630,8 @@ if __name__ == '__main__':
     #x = m.bfs(m.grid[0],fire_row, fire_col,1)
     #fire_row, fire_col = m.create_fire(dimension)
    # m.advance_fire(flammability)
-    print(m.strategy1(dimension, flammability))
+    #print(m.strategy1(dimension, flammability))
+    print(m.strategy2(dimension, flammability))
     #m.print_grid()
     print()
     #print(m.strategy1(fire_row, fire_col, dimension, flammability))
