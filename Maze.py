@@ -53,10 +53,13 @@ class Square:
         return self.visited
     def set_visited(self):
         self.visited = True
-    def set_distance(self, n):
-        self.current_dist = n
-        self.heuristic = n + sqrt(((dimension - 1 - self.row)**2) + ((dimension - 1 - self.col)**2))
-        #print(f'{heuristic}')
+    def set_distance(self, n, mode, q, fr, fc):
+        if mode == 0:  #regular A star
+            self.current_dist = n
+            self.heuristic = n + sqrt(((dimension - 1 - self.row)**2) + ((dimension - 1 - self.col)**2))
+        elif mode==1 : #strategy 3 A star
+            self.heuristic =  (sqrt(((dimension - 1 - self.row)**2) + ((dimension - 1 - self.col)**2))) - (q * (sqrt(((fr - self.row)**2) + ((fc - self.col)**2))))
+            print(f'{self.row}, {self.col}: dist from end {(sqrt(((dimension - 1 - self.row)**2) + ((dimension - 1 - self.col)**2)))} - dist from fire {(q * (sqrt(((fr - self.row)**2) + ((fc - self.col)**2))))}')
     def set_type(self, n):
         self.Square_type = n
     def is_wall(self):
@@ -71,6 +74,7 @@ class Maze:
         self.rows = dimension
         self.cols = dimension
         self.grid = []
+        self.fire_squares = []
     def print_grid(self):
         for i in range(0,self.rows):
             print()
@@ -187,6 +191,7 @@ class Maze:
                 prob = 1 - (1 - q)**k
                 if random.uniform(0,1) <= prob:
                     fire_list.append(Square.get_pos())
+                    self.fire_squares.append(Square.get_pos())
         for pair in fire_list:
             i,j = pair
             curr = (self.cols*i) + j 
@@ -296,19 +301,35 @@ class Maze:
         print(solution)
         return solution
     
+    def closest_fire_loc(self, r, c):
+        if self.fire_squares==[]:
+            return r, c
+        r1, c1 = self.fire_squares[0]
+        ed = sqrt( ((r-r1)**2) + ((c-c1)**2) )
+        
+        for pair in self.fire_squares:
+            i, j = pair
+            if (ed > sqrt( ((r-i)**2) + ((c-j)**2) )):
+                r1 = i 
+                c1 = j
+                ed = sqrt( ((r-i)**2) + ((c-j)**2) )
+        
+        return r1, c1
     
-    def strat3_a_star(self, start_square):
+    def strat3_a_star(self, start_square, q, mode, fire_row, fire_col):
         
         t1=time.time()
         
         if (self.grid[1].get_type()==1) and (self.grid[(self.cols*1) + 0].get_type()==1):
             t2 = time.time()
             print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
-            return "No solution"
+            print( "No solution")
+            return 2
         elif (self.grid[(self.cols * (self.rows-1)) + self.cols -2].get_type()==1) and (self.grid[(self.cols * (self.rows-2)) + self.cols - 1].get_type()==1):
             t2 = time.time()
             print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
-            return "No solution"
+            print( "No solution")
+            return 2
         
         fringe = []
         heapq.heappush(fringe, start_square)
@@ -327,25 +348,33 @@ class Maze:
             top =  (self.cols * (r-1)) + c
             bottom = (self.cols * (r+1)) + c
             curr_loc = (self.cols*r) + c 
-            direction = []
-            if r == self.rows-1 and c == self.cols - 1:
-                self.printPath(curr_loc)
+            #fr, fc = self.closest_fire_loc(r,c)
+            
+            if mode == 1 and r == self.rows-1 and c == self.cols - 1:
+                #self.printPath(curr_loc)
                 t2 = time.time()
                 print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
-                print("success, goal reached")
-                return "done"
+                #print("success, goal reached")
+                print( "done")
+                return 0
             
-            
+            if mode == 2 and r == fire_row and c == fire_col:
+                print("path exists from start to fire")
+                return 1
             
             if curr.get_isStart():
                 if self.grid[right].get_type() == 0 :
-                    self.grid[right].set_distance(1)
+                    fr, fc = self.closest_fire_loc(r,c+1)
+                    #print(fr, fc)
+                    self.grid[right].set_distance(0, 1, q, fr, fc)
                     self.grid[right].set_parent(r,c)
                     heapq.heappush(fringe, self.grid[right])
                     #print(f'{self.grid[right].current_dist}')
                     
                 if self.grid[bottom].get_type() == 0 : 
-                    self.grid[bottom].set_distance(1)
+                    fr, fc = self.closest_fire_loc(r+1,c)
+                    #print(fr, fc)
+                    self.grid[bottom].set_distance(0, 1, q, fr, fc)
                     self.grid[bottom].set_parent(r,c)
                     heapq.heappush(fringe, self.grid[bottom])
                     #print(f'{self.grid[bottom].current_dist}')
@@ -353,50 +382,66 @@ class Maze:
             elif curr.is_wall():
                 if (c != self.cols - 1) and (self.grid[right].is_visited() is False) and (self.grid[right].get_type() != 1) and (self.is_parent(p1, p2, right) is False):
                     if self.grid[right] not in fringe :
-                        self.grid[right].set_distance(self.grid[curr_loc].current_dist + 1)
+                        fr, fc = self.closest_fire_loc(r,c+1)
+                        #print(fr, fc)
+                        self.grid[right].set_distance(self.grid[curr_loc].current_dist + 1, 1, q, fr, fc)
                         self.grid[right].set_parent(r,c)
                         heapq.heappush(fringe, self.grid[right]) 
                 elif (c != 0) and (self.grid[left].is_visited() is False) and (self.grid[left].get_type()==0) and (self.is_parent(p1, p2, left) is False):
                     if self.grid[left] not in fringe :
-                        self.grid[left].set_distance(self.grid[curr_loc].current_dist + 1)
+                        fr, fc = self.closest_fire_loc(r,c-1)
+                        #print(fr, fc)
+                        self.grid[left].set_distance(self.grid[curr_loc].current_dist + 1, 1, q, fr, fc)
                         self.grid[left].set_parent(r,c)
                         heapq.heappush(fringe, self.grid[left])     
                 if (r != self.rows -1) and (self.grid[bottom].is_visited() is False) and (self.grid[bottom].get_type()!=1) and (self.is_parent(p1, p2, bottom) is False):
                     if self.grid[bottom] not in fringe :
-                        self.grid[bottom].set_distance(self.grid[curr_loc].current_dist + 1)
+                        fr, fc = self.closest_fire_loc(r+1,c)
+                        #print(fr, fc)
+                        self.grid[bottom].set_distance(self.grid[curr_loc].current_dist + 1, 1, q, fr, fc)
                         self.grid[bottom].set_parent(r,c)
                         heapq.heappush(fringe, self.grid[bottom])    
                 elif (r != 0) and (self.grid[top].is_visited() is False) and (self.grid[top].get_type()==0) and (self.is_parent(p1, p2, top) is False):
                     if self.grid[top] not in fringe :
-                        self.grid[top].set_distance(self.grid[curr_loc].current_dist + 1)
+                        fr, fc = self.closest_fire_loc(r-1,c)
+                        #print(fr, fc)
+                        self.grid[top].set_distance(self.grid[curr_loc].current_dist + 1, 1, q, fr, fc)
                         self.grid[top].set_parent(r,c)
                         heapq.heappush(fringe, self.grid[top])         
             else:
                 if (self.grid[right].get_type()==0) and (self.grid[right].is_visited() is False) and (self.is_parent(p1, p2, right) is False):
                     if self.grid[right] not in fringe :
-                        self.grid[right].set_distance(self.grid[curr_loc].current_dist + 1)
+                        fr, fc = self.closest_fire_loc(r,c+1)
+                        #print(fr, fc)
+                        self.grid[right].set_distance(self.grid[curr_loc].current_dist + 1, 1, q, fr, fc)
                         self.grid[right].set_parent(r,c)
                         heapq.heappush(fringe, self.grid[right]) 
                 if (self.grid[bottom].get_type()==0) and (self.grid[bottom].is_visited() is False) and (self.is_parent(p1, p2, bottom) is False):
                     if self.grid[bottom] not in fringe :
-                        self.grid[bottom].set_distance(self.grid[curr_loc].current_dist + 1)
+                        fr, fc = self.closest_fire_loc(r+1,c)
+                        #print(fr, fc)
+                        self.grid[bottom].set_distance(self.grid[curr_loc].current_dist + 1, 1, q, fr, fc)
                         self.grid[bottom].set_parent(r,c)
                         heapq.heappush(fringe, self.grid[bottom])  
                 if (self.grid[left].get_type()==0) and (self.grid[left].is_visited() is False) and (self.is_parent(p1, p2, left) is False):
                     if self.grid[left] not in fringe :
-                        self.grid[left].set_distance(self.grid[curr_loc].current_dist + 1)
+                        fr, fc = self.closest_fire_loc(r,c-1)
+                        #print(fr, fc)
+                        self.grid[left].set_distance(self.grid[curr_loc].current_dist + 1, 1, q, fr, fc)
                         self.grid[left].set_parent(r,c)
                         heapq.heappush(fringe, self.grid[left])
                 if (self.grid[top].get_type()==0) and (self.grid[top].is_visited() is False) and (self.is_parent(p1, p2, top) is False):
                     if self.grid[top] not in fringe :
-                        self.grid[top].set_distance(self.grid[curr_loc].current_dist + 1)
+                        fr, fc = self.closest_fire_loc(r-1,c)
+                        #print(fr, fc)
+                        self.grid[top].set_distance(self.grid[curr_loc].current_dist + 1, 1, q, fr, fc)
                         self.grid[top].set_parent(r,c)
                         heapq.heappush(fringe, self.grid[top])  
                          
         t2 = time.time()
         print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
         print("Not Done")
-        return    
+        return 2 
                     
     
     
@@ -443,13 +488,13 @@ class Maze:
             
             if curr.get_isStart():
                 if self.grid[right].get_type() == 0 :
-                    self.grid[right].set_distance(1)
+                    self.grid[right].set_distance(1, 0, 0, 0, 0)
                     self.grid[right].set_parent(r,c)
                     heapq.heappush(fringe, self.grid[right])
                     #print(f'{self.grid[right].current_dist}')
                     
                 if self.grid[bottom].get_type() == 0 : 
-                    self.grid[bottom].set_distance(1)
+                    self.grid[bottom].set_distance(1, 0, 0, 0, 0)
                     self.grid[bottom].set_parent(r,c)
                     heapq.heappush(fringe, self.grid[bottom])
                     #print(f'{self.grid[bottom].current_dist}')
@@ -457,43 +502,43 @@ class Maze:
             elif curr.is_wall():
                 if (c != self.cols - 1) and (self.grid[right].is_visited() is False) and (self.grid[right].get_type() != 1) and (self.is_parent(p1, p2, right) is False):
                     if self.grid[right] not in fringe :
-                        self.grid[right].set_distance(self.grid[curr_loc].current_dist + 1)
+                        self.grid[right].set_distance(self.grid[curr_loc].current_dist + 1, 0, 0, 0, 0)
                         self.grid[right].set_parent(r,c)
                         heapq.heappush(fringe, self.grid[right]) 
                 elif (c != 0) and (self.grid[left].is_visited() is False) and (self.grid[left].get_type()==0) and (self.is_parent(p1, p2, left) is False):
                     if self.grid[left] not in fringe :
-                        self.grid[left].set_distance(self.grid[curr_loc].current_dist + 1)
+                        self.grid[left].set_distance(self.grid[curr_loc].current_dist + 1, 0, 0, 0, 0)
                         self.grid[left].set_parent(r,c)
                         heapq.heappush(fringe, self.grid[left])     
                 if (r != self.rows -1) and (self.grid[bottom].is_visited() is False) and (self.grid[bottom].get_type()!=1) and (self.is_parent(p1, p2, bottom) is False):
                     if self.grid[bottom] not in fringe :
-                        self.grid[bottom].set_distance(self.grid[curr_loc].current_dist + 1)
+                        self.grid[bottom].set_distance(self.grid[curr_loc].current_dist + 1, 0, 0, 0, 0)
                         self.grid[bottom].set_parent(r,c)
                         heapq.heappush(fringe, self.grid[bottom])    
                 elif (r != 0) and (self.grid[top].is_visited() is False) and (self.grid[top].get_type()==0) and (self.is_parent(p1, p2, top) is False):
                     if self.grid[top] not in fringe :
-                        self.grid[top].set_distance(self.grid[curr_loc].current_dist + 1)
+                        self.grid[top].set_distance(self.grid[curr_loc].current_dist + 1, 0, 0, 0, 0)
                         self.grid[top].set_parent(r,c)
                         heapq.heappush(fringe, self.grid[top])         
             else:
                 if (self.grid[right].get_type()==0) and (self.grid[right].is_visited() is False) and (self.is_parent(p1, p2, right) is False):
                     if self.grid[right] not in fringe :
-                        self.grid[right].set_distance(self.grid[curr_loc].current_dist + 1)
+                        self.grid[right].set_distance(self.grid[curr_loc].current_dist + 1, 0, 0, 0, 0)
                         self.grid[right].set_parent(r,c)
                         heapq.heappush(fringe, self.grid[right]) 
                 if (self.grid[bottom].get_type()==0) and (self.grid[bottom].is_visited() is False) and (self.is_parent(p1, p2, bottom) is False):
                     if self.grid[bottom] not in fringe :
-                        self.grid[bottom].set_distance(self.grid[curr_loc].current_dist + 1)
+                        self.grid[bottom].set_distance(self.grid[curr_loc].current_dist + 1, 0, 0, 0, 0)
                         self.grid[bottom].set_parent(r,c)
                         heapq.heappush(fringe, self.grid[bottom])  
                 if (self.grid[left].get_type()==0) and (self.grid[left].is_visited() is False) and (self.is_parent(p1, p2, left) is False):
                     if self.grid[left] not in fringe :
-                        self.grid[left].set_distance(self.grid[curr_loc].current_dist + 1)
+                        self.grid[left].set_distance(self.grid[curr_loc].current_dist + 1, 0, 0, 0, 0)
                         self.grid[left].set_parent(r,c)
                         heapq.heappush(fringe, self.grid[left])
                 if (self.grid[top].get_type()==0) and (self.grid[top].is_visited() is False) and (self.is_parent(p1, p2, top) is False):
                     if self.grid[top] not in fringe :
-                        self.grid[top].set_distance(self.grid[curr_loc].current_dist + 1)
+                        self.grid[top].set_distance(self.grid[curr_loc].current_dist + 1, 0, 0, 0, 0)
                         self.grid[top].set_parent(r,c)
                         heapq.heappush(fringe, self.grid[top])  
                          
@@ -600,6 +645,36 @@ class Maze:
     def agent_moves(self, path):
         r, c = path[0]
         return r, c
+    
+    def strategy3(self, dim, q):
+        x = self.strat3_a_star(self.grid[0], q, 1, -1, -1)
+        fire_row, fire_col = m.create_fire(dim)
+        self.fire_squares.append((fire_row, fire_col))
+        end = (self.cols * (dim - 1)) + (dim - 1)
+        path = None
+        if(x==0):
+            path = self.printPath(end, 0)
+        
+        while(x==0):
+            self.clear_visited()
+            r1, c1 = self.agent_moves(path)
+            #path.pop(0)
+            curr_loc = (self.cols*r1) + c1
+            self.advance_fire(q)
+            print()
+            self.print_grid()
+            if (r1==dim-1) and (c1==dim-1):
+                return "goal reached"
+            if (self.grid[end].get_type()==4):
+                return "goal is on fire"
+            if self.grid[curr_loc].get_type()== 4:
+                    print("on" + str(curr_loc))
+                    print("Tu jaal gya bc")
+                    return "agent's current loc caught fire"
+            x = self.strat3_a_star(self.grid[ (self.cols * r1) + c1 ], q, 1, -1, -1)
+            if(x==0):
+                path = self.printPath(end, (self.cols * r1) + c1 )
+        return "agent has no path left to the end"
     
     def strategy2(self, dim, q):
         x = self.bfs(self.grid[0], -1, -1, 1)
@@ -735,7 +810,8 @@ if __name__ == '__main__':
     #fire_row, fire_col = m.create_fire(dimension)
    # m.advance_fire(flammability)
     #print(m.strategy1(dimension, flammability))
-    print(m.strategy2(dimension, flammability))
+    #print(m.strategy2(dimension, flammability))
+    print(m.strategy3(dimension, flammability))
     #m.print_grid()
     print()
     #print(m.strategy1(fire_row, fire_col, dimension, flammability))
