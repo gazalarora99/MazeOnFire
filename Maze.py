@@ -297,6 +297,110 @@ class Maze:
         return solution
     
     
+    def strat3_a_star(self, start_square):
+        
+        t1=time.time()
+        
+        if (self.grid[1].get_type()==1) and (self.grid[(self.cols*1) + 0].get_type()==1):
+            t2 = time.time()
+            print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
+            return "No solution"
+        elif (self.grid[(self.cols * (self.rows-1)) + self.cols -2].get_type()==1) and (self.grid[(self.cols * (self.rows-2)) + self.cols - 1].get_type()==1):
+            t2 = time.time()
+            print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
+            return "No solution"
+        
+        fringe = []
+        heapq.heappush(fringe, start_square)
+        i = 0
+        while fringe :
+            i = i + 1
+            curr = heapq.heappop(fringe)
+            curr.set_visited()
+            r,c  = curr.get_pos()
+            p1, p2 = curr.get_parent()
+            #curr.set_distance(self.grid[(self.cols*p1) + p2].current_dist + 1)
+            #print("dist = " + str(curr.current_dist) + ", heur = " + str(curr.heuristic) + ", r = " + str(r) + ", c = " + str(c))
+            #print(curr.__str__())
+            right = (self.cols*r) + c + 1
+            left = (self.cols*r) + c - 1
+            top =  (self.cols * (r-1)) + c
+            bottom = (self.cols * (r+1)) + c
+            curr_loc = (self.cols*r) + c 
+            direction = []
+            if r == self.rows-1 and c == self.cols - 1:
+                self.printPath(curr_loc)
+                t2 = time.time()
+                print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
+                print("success, goal reached")
+                return "done"
+            
+            
+            
+            if curr.get_isStart():
+                if self.grid[right].get_type() == 0 :
+                    self.grid[right].set_distance(1)
+                    self.grid[right].set_parent(r,c)
+                    heapq.heappush(fringe, self.grid[right])
+                    #print(f'{self.grid[right].current_dist}')
+                    
+                if self.grid[bottom].get_type() == 0 : 
+                    self.grid[bottom].set_distance(1)
+                    self.grid[bottom].set_parent(r,c)
+                    heapq.heappush(fringe, self.grid[bottom])
+                    #print(f'{self.grid[bottom].current_dist}')
+                    
+            elif curr.is_wall():
+                if (c != self.cols - 1) and (self.grid[right].is_visited() is False) and (self.grid[right].get_type() != 1) and (self.is_parent(p1, p2, right) is False):
+                    if self.grid[right] not in fringe :
+                        self.grid[right].set_distance(self.grid[curr_loc].current_dist + 1)
+                        self.grid[right].set_parent(r,c)
+                        heapq.heappush(fringe, self.grid[right]) 
+                elif (c != 0) and (self.grid[left].is_visited() is False) and (self.grid[left].get_type()==0) and (self.is_parent(p1, p2, left) is False):
+                    if self.grid[left] not in fringe :
+                        self.grid[left].set_distance(self.grid[curr_loc].current_dist + 1)
+                        self.grid[left].set_parent(r,c)
+                        heapq.heappush(fringe, self.grid[left])     
+                if (r != self.rows -1) and (self.grid[bottom].is_visited() is False) and (self.grid[bottom].get_type()!=1) and (self.is_parent(p1, p2, bottom) is False):
+                    if self.grid[bottom] not in fringe :
+                        self.grid[bottom].set_distance(self.grid[curr_loc].current_dist + 1)
+                        self.grid[bottom].set_parent(r,c)
+                        heapq.heappush(fringe, self.grid[bottom])    
+                elif (r != 0) and (self.grid[top].is_visited() is False) and (self.grid[top].get_type()==0) and (self.is_parent(p1, p2, top) is False):
+                    if self.grid[top] not in fringe :
+                        self.grid[top].set_distance(self.grid[curr_loc].current_dist + 1)
+                        self.grid[top].set_parent(r,c)
+                        heapq.heappush(fringe, self.grid[top])         
+            else:
+                if (self.grid[right].get_type()==0) and (self.grid[right].is_visited() is False) and (self.is_parent(p1, p2, right) is False):
+                    if self.grid[right] not in fringe :
+                        self.grid[right].set_distance(self.grid[curr_loc].current_dist + 1)
+                        self.grid[right].set_parent(r,c)
+                        heapq.heappush(fringe, self.grid[right]) 
+                if (self.grid[bottom].get_type()==0) and (self.grid[bottom].is_visited() is False) and (self.is_parent(p1, p2, bottom) is False):
+                    if self.grid[bottom] not in fringe :
+                        self.grid[bottom].set_distance(self.grid[curr_loc].current_dist + 1)
+                        self.grid[bottom].set_parent(r,c)
+                        heapq.heappush(fringe, self.grid[bottom])  
+                if (self.grid[left].get_type()==0) and (self.grid[left].is_visited() is False) and (self.is_parent(p1, p2, left) is False):
+                    if self.grid[left] not in fringe :
+                        self.grid[left].set_distance(self.grid[curr_loc].current_dist + 1)
+                        self.grid[left].set_parent(r,c)
+                        heapq.heappush(fringe, self.grid[left])
+                if (self.grid[top].get_type()==0) and (self.grid[top].is_visited() is False) and (self.is_parent(p1, p2, top) is False):
+                    if self.grid[top] not in fringe :
+                        self.grid[top].set_distance(self.grid[curr_loc].current_dist + 1)
+                        self.grid[top].set_parent(r,c)
+                        heapq.heappush(fringe, self.grid[top])  
+                         
+        t2 = time.time()
+        print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
+        print("Not Done")
+        return    
+                    
+    
+    
+    
     def a_star(self, start_square):
         
         t1=time.time()
