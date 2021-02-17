@@ -154,10 +154,10 @@ class Maze:
                 self.x+=20  
     
     def create_fire(self, dim):
-       x = random.randint(0, dim-1)
-       y = random.randint(0, dim-1)
-       self.grid[(self.cols * x)+y].set_type(4)
-       return x, y
+        x = random.randint(0, dim-1)
+        y = random.randint(0, dim-1)
+        self.grid[(self.cols * x)+y].set_type(4)
+        return x, y
     
     def advance_fire(self,q):
         fire_list=[]
@@ -301,7 +301,7 @@ class Maze:
             r,c = self.grid[curr_loc].get_parent();
             curr_loc = (self.cols*r) + c 
         solution.reverse()
-        print(solution)
+        #print(solution)
         return solution
     
     def closest_fire_loc(self, r, c):
@@ -553,7 +553,7 @@ class Maze:
                         
             ##mode = 1 for start to end
             # mode = 2 for start to fire  
-    def bfs(self, start_square, fire_row, fire_col,mode):
+    def bfs(self, start_square, fire_row, fire_col, mode):
         
         
         t1=time.time()
@@ -601,39 +601,75 @@ class Maze:
                     fringe.appendleft(self.grid[bottom])
                     self.grid[bottom].set_parent(r,c)
             elif curr.is_wall():
-                if c != self.cols - 1 and self.grid[right].is_visited() is False and (self.grid[right].get_type()== 0 or self.grid[right].get_type()== 2):
-                    if self.grid[right] not in fringe :
-                        self.grid[right].set_parent(r,c)
-                        fringe.appendleft(self.grid[right]) 
-                elif c != 0 and self.grid[left].is_visited() is False and self.grid[left].get_type()== 0:
-                    if self.grid[left] not in fringe :
-                        self.grid[left].set_parent(r,c)
-                        fringe.appendleft(self.grid[left])    
-                if r != self.rows -1 and self.grid[bottom].is_visited() is False and (self.grid[bottom].get_type()== 0 or self.grid[bottom].get_type()==2):
-                    if self.grid[bottom] not in fringe :
-                        self.grid[bottom].set_parent(r,c)
-                        fringe.appendleft(self.grid[bottom])    
-                elif r != 0 and self.grid[top].is_visited() is False and self.grid[top].get_type()==0:
-                    if self.grid[top] not in fringe :
-                        self.grid[top].set_parent(r,c)
-                        fringe.appendleft(self.grid[top])       
+                if(mode==1):
+                    if c != self.cols - 1 and self.grid[right].is_visited() is False and (self.grid[right].get_type()== 0 or self.grid[right].get_type()== 2):
+                        if self.grid[right] not in fringe :
+                            self.grid[right].set_parent(r,c)
+                            fringe.appendleft(self.grid[right]) 
+                    elif c != 0 and self.grid[left].is_visited() is False and self.grid[left].get_type()== 0:
+                        if self.grid[left] not in fringe :
+                            self.grid[left].set_parent(r,c)
+                            fringe.appendleft(self.grid[left])    
+                    if r != self.rows -1 and self.grid[bottom].is_visited() is False and (self.grid[bottom].get_type()== 0 or self.grid[bottom].get_type()==2):
+                        if self.grid[bottom] not in fringe :
+                            self.grid[bottom].set_parent(r,c)
+                            fringe.appendleft(self.grid[bottom])    
+                    elif r != 0 and self.grid[top].is_visited() is False and self.grid[top].get_type()==0:
+                        if self.grid[top] not in fringe :
+                            self.grid[top].set_parent(r,c)
+                            fringe.appendleft(self.grid[top])
+                elif mode==2:
+                    if c != self.cols - 1 and self.grid[right].is_visited() is False and (self.grid[right].get_type()== 0 or self.grid[right].get_type()== 4):
+                        if self.grid[right] not in fringe :
+                            self.grid[right].set_parent(r,c)
+                            fringe.appendleft(self.grid[right]) 
+                    elif c != 0 and self.grid[left].is_visited() is False and (self.grid[left].get_type()== 0 or self.grid[left].get_type()== 4):
+                        if self.grid[left] not in fringe :
+                            self.grid[left].set_parent(r,c)
+                            fringe.appendleft(self.grid[left])    
+                    if r != self.rows -1 and self.grid[bottom].is_visited() is False and (self.grid[bottom].get_type()== 0 or self.grid[bottom].get_type()==4):
+                        if self.grid[bottom] not in fringe :
+                            self.grid[bottom].set_parent(r,c)
+                            fringe.appendleft(self.grid[bottom])    
+                    elif r != 0 and self.grid[top].is_visited() is False and (self.grid[top].get_type()==0 or self.grid[top].get_type()== 4):
+                        if self.grid[top] not in fringe :
+                            self.grid[top].set_parent(r,c)
+                            fringe.appendleft(self.grid[top])       
             else:
-                if self.grid[right].get_type()== 0 and self.grid[right].is_visited() is False:
-                    if self.grid[right] not in fringe :
-                        self.grid[right].set_parent(r,c)
-                        fringe.appendleft(self.grid[right])
-                if self.grid[left].get_type()== 0 and self.grid[left].is_visited() is False:
-                    if self.grid[left] not in fringe :
-                        self.grid[left].set_parent(r,c)
-                        fringe.appendleft(self.grid[left]) 
-                if self.grid[bottom].get_type()== 0 and self.grid[bottom].is_visited() is False:
-                    if self.grid[bottom] not in fringe :
-                        self.grid[bottom].set_parent(r,c)
-                        fringe.appendleft(self.grid[bottom]) 
-                if self.grid[top].get_type()== 0 and self.grid[top].is_visited() is False:
-                    if self.grid[top] not in fringe :
-                        self.grid[top].set_parent(r,c)
-                        fringe.appendleft(self.grid[top])  
+                if(mode==1):
+                    if self.grid[right].get_type()== 0 and self.grid[right].is_visited() is False:
+                        if self.grid[right] not in fringe :
+                            self.grid[right].set_parent(r,c)
+                            fringe.appendleft(self.grid[right])
+                    if self.grid[left].get_type()== 0 and self.grid[left].is_visited() is False:
+                        if self.grid[left] not in fringe :
+                            self.grid[left].set_parent(r,c)
+                            fringe.appendleft(self.grid[left]) 
+                    if self.grid[bottom].get_type()== 0 and self.grid[bottom].is_visited() is False:
+                        if self.grid[bottom] not in fringe :
+                            self.grid[bottom].set_parent(r,c)
+                            fringe.appendleft(self.grid[bottom]) 
+                    if self.grid[top].get_type()== 0 and self.grid[top].is_visited() is False:
+                        if self.grid[top] not in fringe :
+                            self.grid[top].set_parent(r,c)
+                            fringe.appendleft(self.grid[top])
+                elif mode==2:
+                    if (self.grid[right].get_type()== 0 or self.grid[right].get_type()== 4)  and self.grid[right].is_visited() is False:
+                        if self.grid[right] not in fringe :
+                            self.grid[right].set_parent(r,c)
+                            fringe.appendleft(self.grid[right])
+                    if (self.grid[left].get_type()== 0 or self.grid[left].get_type()== 4) and self.grid[left].is_visited() is False:
+                        if self.grid[left] not in fringe :
+                            self.grid[left].set_parent(r,c)
+                            fringe.appendleft(self.grid[left]) 
+                    if (self.grid[bottom].get_type()== 0 or self.grid[bottom].get_type()== 4) and self.grid[bottom].is_visited() is False:
+                        if self.grid[bottom] not in fringe :
+                            self.grid[bottom].set_parent(r,c)
+                            fringe.appendleft(self.grid[bottom]) 
+                    if (self.grid[top].get_type()== 0 or self.grid[top].get_type()== 4)and self.grid[top].is_visited() is False:
+                        if self.grid[top] not in fringe :
+                            self.grid[top].set_parent(r,c)
+                            fringe.appendleft(self.grid[top])  
                             
             self.grid[(self.cols*r) + c ].set_visited()
         t2 = time.time()
@@ -696,8 +732,8 @@ class Maze:
             #path.pop(0)
             curr_loc = (self.cols*r1) + c1
             self.advance_fire(q)
-            print()
-            self.print_grid(curr_loc)
+            #print()
+            #self.print_grid(curr_loc)
             if (r1==dim-1) and (c1==dim-1):
                 return "goal reached"
             if (self.grid[end].get_type()==4):
@@ -825,25 +861,30 @@ if __name__ == '__main__':
     #m.bfs(m.grid[0],-1, -1,1)
     #print(m.a_star(m.grid[0]))
     #m.strat3_a_star(m.grid[0],flammability,1,4,8)
-    m.strategy3(dimension, flammability)
-'''    c=0
+    #m.strategy3(dimension, flammability)
+    c=0
     mazes = []
-    for i in range(30):
+    for i in range(25):
         mazes.append(Maze(dimension,probability))
         mazes[i].populate_grid(dimension, probability)
         mazes[i].clear_visited()
         x = mazes[i].bfs(mazes[i].grid[0], -1, -1, 1)
         fire_row, fire_col = mazes[i].create_fire(dimension)
+        #mazes[i].fire_squares.append((fire_row, fire_col))
         mazes[i].clear_visited()
         y = mazes[i].bfs(mazes[i].grid[0], fire_row, fire_col, 2)
         mazes[i].clear_visited()
-        print(f'{x}, {y}')
-        mazes[i].print_grid()
-        print()
+        #print(f'{x}, {y}')
+        
+        
         if (x == 0 and y==1):
             c=c+1
+            #mazes[i].print_grid(-1)
+            #print()
             #print("here2")
             print(mazes[i].strategy2(dimension, flammability, x))
+        if(c==10):
+            break
         mazes[i].clear_visited()
         #print(str(i+1) + " iteration: " + mazes[i].dfs(mazes[i].get_fringe(0,0), []))
     ##m.build_maze(probability, screen)
@@ -868,7 +909,7 @@ if __name__ == '__main__':
     #m.grid[0].set_parent(0, 0)
     #m.bfs(m.grid[0], fire_row, fire_col)
     #print(m.a_star(m.grid[0]))
-    
+    '''
     running = True
     while running:
         clock.tick(60)
