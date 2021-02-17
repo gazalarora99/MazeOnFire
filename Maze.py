@@ -12,7 +12,6 @@ import random
 import heapq
 from collections import deque
 from math import sqrt
-from conda.common._logic import FALSE
 #Initializing pygame
 pygame.init()
 pygame.mixer.init()
@@ -60,7 +59,7 @@ class Square:
             self.current_dist = n
             self.heuristic = n + sqrt(((dimension - 1 - self.row)**2) + ((dimension - 1 - self.col)**2))
         elif mode==1 : #strategy 3 A star
-            self.heuristic =  (sqrt(((dimension - 1 - self.row)**2) + ((dimension - 1 - self.col)**2))) - (q * (sqrt(((fr - self.row)**2) + ((fc - self.col)**2))))
+            self.heuristic =  (sqrt(((dimension - 1 - self.row)**2) + ((dimension - 1 - self.col)**2))) - ((sqrt(((fr - self.row)**2) + ((fc - self.col)**2)))/q)
             #print(f'{self.row}, {self.col}: dist from end {(sqrt(((dimension - 1 - self.row)**2) + ((dimension - 1 - self.col)**2)))} - dist from fire {(q * (sqrt(((fr - self.row)**2) + ((fc - self.col)**2))))}')
     def set_type(self, n):
         self.Square_type = n
@@ -77,18 +76,20 @@ class Maze:
         self.cols = dimension
         self.grid = []
         self.fire_squares = []
-    def print_grid(self):
+    def print_grid(self,currloc):
         for i in range(0,self.rows):
             print()
             for j in range(0,self.cols):
                 if self.grid[(self.cols * i) + j].get_type() == 3:
                     print("S", end = " ")
+                if ((self.cols*i) + j)  == currloc:
+                    print("*", end=" ") 
                 elif self.grid[(self.cols*i) + j].get_type() == 0:
                     print("_", end = " ")
                 elif self.grid[(self.cols*i) + j].get_type() == 1:
                     print("@", end = " ")
                 elif self.grid[(self.cols*i) + j].get_type() == 4:
-                    print("F", end = " ")      
+                    print("F", end = " ")       
                 elif self.grid[(self.cols*i) + j].get_type() == 2:
                     print("E", end = " ")                           
     ### makes 2d array with given dimensions and has square objects in it.
@@ -153,10 +154,10 @@ class Maze:
                 self.x+=20  
     
     def create_fire(self, dim):
-        x = random.randint(0, dim-1)
-        y = random.randint(0, dim-1)
-        self.grid[(self.cols * x)+y].set_type(4)
-        return x, y
+       x = random.randint(0, dim-1)
+       y = random.randint(0, dim-1)
+       self.grid[(self.cols * x)+y].set_type(4)
+       return x, y
     
     def advance_fire(self,q):
         fire_list=[]
@@ -367,7 +368,7 @@ class Maze:
             if curr.get_isStart():
                 if self.grid[right].get_type() == 0 :
                     fr, fc = self.closest_fire_loc(r,c+1)
-                    #print(fr, fc)
+                    print(fr, fc)
                     self.grid[right].set_distance(0, 1, q, fr, fc)
                     self.grid[right].set_parent(r,c)
                     heapq.heappush(fringe, self.grid[right])
@@ -392,7 +393,7 @@ class Maze:
                 elif (c != 0) and (self.grid[left].is_visited() is False) and (self.grid[left].get_type()==0) and (self.is_parent(p1, p2, left) is False):
                     if self.grid[left] not in fringe :
                         fr, fc = self.closest_fire_loc(r,c-1)
-                        #print(fr, fc)
+                       # print(fr, fc)
                         self.grid[left].set_distance(self.grid[curr_loc].current_dist + 1, 1, q, fr, fc)
                         self.grid[left].set_parent(r,c)
                         heapq.heappush(fringe, self.grid[left])     
@@ -653,6 +654,7 @@ class Maze:
     def strategy3(self, dim, q):
         x = self.strat3_a_star(self.grid[0], q, 1, -1, -1)
         fire_row, fire_col = m.create_fire(dim)
+        self.print_grid(-1)
         self.fire_squares.append((fire_row, fire_col))
         end = (self.cols * (dim - 1)) + (dim - 1)
         path = None
@@ -666,13 +668,13 @@ class Maze:
             curr_loc = (self.cols*r1) + c1
             self.advance_fire(q)
             print()
-            self.print_grid()
+            self.print_grid(curr_loc)
             if (r1==dim-1) and (c1==dim-1):
                 return "goal reached"
             if (self.grid[end].get_type()==4):
                 return "goal is on fire"
             if self.grid[curr_loc].get_type()== 4:
-                    print("on" + str(curr_loc))
+                    #print("on" + str(curr_loc))
                     print("Tu jaal gya bc")
                     return "agent's current loc caught fire"
             x = self.strat3_a_star(self.grid[ (self.cols * r1) + c1 ], q, 1, -1, -1)
@@ -695,7 +697,7 @@ class Maze:
             curr_loc = (self.cols*r1) + c1
             self.advance_fire(q)
             print()
-            self.print_grid()
+            self.print_grid(curr_loc)
             if (r1==dim-1) and (c1==dim-1):
                 return "goal reached"
             if (self.grid[end].get_type()==4):
@@ -722,7 +724,7 @@ class Maze:
                 curr_loc = (self.cols*r1) + c1
                 self.advance_fire(q)
                 print()
-                self.print_grid()
+                self.print_grid(curr_loc)
                 if (r1==dim-1) and (c1==dim-1):
                     return "goal reached"
                 if (self.grid[end].get_type()==4):
@@ -822,8 +824,9 @@ if __name__ == '__main__':
     #m.dfs(m.get_fringe(0,0), [])
     #m.bfs(m.grid[0],-1, -1,1)
     #print(m.a_star(m.grid[0]))
-    
-    c=0
+    #m.strat3_a_star(m.grid[0],flammability,1,4,8)
+    m.strategy3(dimension, flammability)
+'''    c=0
     mazes = []
     for i in range(30):
         mazes.append(Maze(dimension,probability))
@@ -866,8 +869,7 @@ if __name__ == '__main__':
     #m.bfs(m.grid[0], fire_row, fire_col)
     #print(m.a_star(m.grid[0]))
     
-    
-''' running = True
+    running = True
     while running:
         clock.tick(60)
         for event in pygame.event.get():
