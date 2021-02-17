@@ -5,7 +5,9 @@ Created on Jan 30, 2021
 @author: Gazal Arora
 '''
 import pygame
+from timeit import default_timer as timer
 import time
+import datetime
 import random
 import heapq
 from collections import deque
@@ -59,7 +61,7 @@ class Square:
             self.heuristic = n + sqrt(((dimension - 1 - self.row)**2) + ((dimension - 1 - self.col)**2))
         elif mode==1 : #strategy 3 A star
             self.heuristic =  (sqrt(((dimension - 1 - self.row)**2) + ((dimension - 1 - self.col)**2))) - (q * (sqrt(((fr - self.row)**2) + ((fc - self.col)**2))))
-            print(f'{self.row}, {self.col}: dist from end {(sqrt(((dimension - 1 - self.row)**2) + ((dimension - 1 - self.col)**2)))} - dist from fire {(q * (sqrt(((fr - self.row)**2) + ((fc - self.col)**2))))}')
+            #print(f'{self.row}, {self.col}: dist from end {(sqrt(((dimension - 1 - self.row)**2) + ((dimension - 1 - self.col)**2)))} - dist from fire {(q * (sqrt(((fr - self.row)**2) + ((fc - self.col)**2))))}')
     def set_type(self, n):
         self.Square_type = n
     def is_wall(self):
@@ -380,7 +382,7 @@ class Maze:
                     #print(f'{self.grid[bottom].current_dist}')
                     
             elif curr.is_wall():
-                if (c != self.cols - 1) and (self.grid[right].is_visited() is False) and (self.grid[right].get_type() != 1) and (self.is_parent(p1, p2, right) is False):
+                if (c != self.cols - 1) and (self.grid[right].is_visited() is False) and (self.grid[right].get_type() == 0 or self.grid[right].get_type() == 2) and (self.is_parent(p1, p2, right) is False):
                     if self.grid[right] not in fringe :
                         fr, fc = self.closest_fire_loc(r,c+1)
                         #print(fr, fc)
@@ -394,7 +396,7 @@ class Maze:
                         self.grid[left].set_distance(self.grid[curr_loc].current_dist + 1, 1, q, fr, fc)
                         self.grid[left].set_parent(r,c)
                         heapq.heappush(fringe, self.grid[left])     
-                if (r != self.rows -1) and (self.grid[bottom].is_visited() is False) and (self.grid[bottom].get_type()!=1) and (self.is_parent(p1, p2, bottom) is False):
+                if (r != self.rows -1) and (self.grid[bottom].is_visited() is False) and (self.grid[bottom].get_type()==0 or self.grid[right].get_type() == 2) and (self.is_parent(p1, p2, bottom) is False):
                     if self.grid[bottom] not in fringe :
                         fr, fc = self.closest_fire_loc(r+1,c)
                         #print(fr, fc)
@@ -478,7 +480,7 @@ class Maze:
             curr_loc = (self.cols*r) + c 
             
             if r == self.rows-1 and c == self.cols - 1:
-                self.printPath(curr_loc)
+                #self.printPath(curr_loc)
                 t2 = time.time()
                 print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
                 print("success, goal reached")
@@ -544,8 +546,8 @@ class Maze:
                          
         t2 = time.time()
         print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
-        print("Not Done")
-        return    
+        #print("Not Done")
+        return  "Not Done"
                     
                         
             ##mode = 1 for start to end
@@ -556,11 +558,13 @@ class Maze:
         t1=time.time()
         if (self.grid[1].get_type()==1) and (self.grid[(self.cols*1) + 0].get_type()==1):
             t2 = time.time()
-            print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
+            #print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
+            #print("no solution")
             return 2
         elif (self.grid[(self.cols * (self.rows-1)) + self.cols -2].get_type()==1) and (self.grid[(self.cols * (self.rows-2)) + self.cols - 1].get_type()==1):
             t2 = time.time()
-            print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
+            #print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
+            #print("no solution")
             return 2
         
         fringe = deque()
@@ -580,12 +584,12 @@ class Maze:
             if mode == 1 and r == self.rows-1 and c == self.cols - 1:
                 #self.printPath(curr_loc)
                 t2 = time.time()
-                print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
-                print("done")
+                #print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
+                #print("solved")
                 return 0
             
             if mode == 2 and r == fire_row and c == fire_col:
-                print("path exists from start to fire")
+                #print("path exists from start to fire")
                 return 1
             
             if curr.get_isStart():
@@ -632,8 +636,8 @@ class Maze:
                             
             self.grid[(self.cols*r) + c ].set_visited()
         t2 = time.time()
-        print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
-        print("Not Done")
+        #print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
+        #print("No solution")
         return 2
     
     def clear_visited(self):
@@ -676,9 +680,9 @@ class Maze:
                 path = self.printPath(end, (self.cols * r1) + c1 )
         return "agent has no path left to the end"
     
-    def strategy2(self, dim, q):
-        x = self.bfs(self.grid[0], -1, -1, 1)
-        fire_row, fire_col = m.create_fire(dim)
+    def strategy2(self, dim, q, x):
+        #x = self.bfs(self.grid[0], -1, -1, 1)
+        #fire_row, fire_col = m.create_fire(dim)
         end = (self.cols * (dim - 1)) + (dim - 1)
         path = None
         if(x==0):
@@ -737,11 +741,13 @@ class Maze:
         if (self.grid[1].get_type()==1) and (self.grid[(self.cols*1) + 0].get_type()==1):
             t2 = time.time()
             print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
-            return "No solution"
+            print("No solution")
+            return 0
         elif (self.grid[(self.cols * (self.rows-1)) + self.cols -2].get_type()==1) and (self.grid[(self.cols * (self.rows-2)) + self.cols - 1].get_type()==1):
             t2 = time.time()
             print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
-            return "No solution"
+            print("No solution")
+            return 0
         i = 0;
         
         while (path!=[] or i==0):
@@ -751,7 +757,8 @@ class Maze:
                 if path==[]:
                     t2 = time.time()
                     print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
-                    return "No solution"
+                    print("No solution")
+                    return 0
                 current = path.pop() #go to parent
                 m, n = current.get_pos()
                 fringe = self.get_fringe(m, n)
@@ -765,7 +772,8 @@ class Maze:
                 print("i value is "+str(i))
                 t2 = time.time()
                 print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
-                return "success, goal reached"
+                print("success, goal reached")
+                return 1
             
             m, n = current.get_pos()
             position = (self.cols * m) + n
@@ -791,7 +799,8 @@ class Maze:
         t2 = time.time()
         print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))    
         print("i value is " + str(i))
-        return "failed"
+        print("failed")
+        return 0
             
             
         
@@ -806,14 +815,49 @@ if __name__ == '__main__':
     m = Maze(dimension,probability)
     ##screen = pygame.display.set_mode((500, 500))
     m.populate_grid(dimension, probability)
+    #start = datetime.datetime.now()
+    #print(f'{start.hour}:{start.minute}:{start.second}')
+    #m.dfs(m.get_fringe(0,0), [])
+    #start=timer()
+    #m.dfs(m.get_fringe(0,0), [])
+    #m.bfs(m.grid[0],-1, -1,1)
+    #print(m.a_star(m.grid[0]))
+    
+    c=0
+    mazes = []
+    for i in range(30):
+        mazes.append(Maze(dimension,probability))
+        mazes[i].populate_grid(dimension, probability)
+        mazes[i].clear_visited()
+        x = mazes[i].bfs(mazes[i].grid[0], -1, -1, 1)
+        fire_row, fire_col = mazes[i].create_fire(dimension)
+        mazes[i].clear_visited()
+        y = mazes[i].bfs(mazes[i].grid[0], fire_row, fire_col, 2)
+        mazes[i].clear_visited()
+        print(f'{x}, {y}')
+        mazes[i].print_grid()
+        print()
+        if (x == 0 and y==1):
+            c=c+1
+            #print("here2")
+            print(mazes[i].strategy2(dimension, flammability, x))
+        mazes[i].clear_visited()
+        #print(str(i+1) + " iteration: " + mazes[i].dfs(mazes[i].get_fringe(0,0), []))
+    ##m.build_maze(probability, screen)
+    print(c)
+    
+    #end = timer()
+    #print(end - start)
+    #end = datetime.datetime.now()
+    #print(f'{end.hour}:{end.minute}:{end.second}')
     #x = m.bfs(m.grid[0],fire_row, fire_col,1)
     #fire_row, fire_col = m.create_fire(dimension)
    # m.advance_fire(flammability)
     #print(m.strategy1(dimension, flammability))
     #print(m.strategy2(dimension, flammability))
-    print(m.strategy3(dimension, flammability))
+    #print(m.strategy3(dimension, flammability))
     #m.print_grid()
-    print()
+    #print()
     #print(m.strategy1(fire_row, fire_col, dimension, flammability))
     #print()
     #for i in range(0, len(m.grid)):
@@ -821,8 +865,6 @@ if __name__ == '__main__':
     #m.grid[0].set_parent(0, 0)
     #m.bfs(m.grid[0], fire_row, fire_col)
     #print(m.a_star(m.grid[0]))
-    #print(m.dfs(m.get_fringe(0,0), []))
-    ##m.build_maze(probability, screen)
     
     
 ''' running = True
