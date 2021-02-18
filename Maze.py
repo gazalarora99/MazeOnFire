@@ -59,7 +59,7 @@ class Square:
             self.current_dist = n
             self.heuristic = n + sqrt(((dimension - 1 - self.row)**2) + ((dimension - 1 - self.col)**2))
         elif mode==1 : #strategy 3 A star
-            self.heuristic =  (sqrt(((dimension - 1 - self.row)**2) + ((dimension - 1 - self.col)**2))) - ((sqrt(((fr - self.row)**2) + ((fc - self.col)**2)))*q)
+            self.heuristic =  (sqrt(((dimension - 1 - self.row)**2) + ((dimension - 1 - self.col)**2))) - ((sqrt(((fr - self.row)**2) + ((fc - self.col)**2)))/q)
             #print(f'{self.row}, {self.col}: dist from end {(sqrt(((dimension - 1 - self.row)**2) + ((dimension - 1 - self.col)**2)))} - dist from fire {(q * (sqrt(((fr - self.row)**2) + ((fc - self.col)**2))))}')
     def set_type(self, n):
         self.Square_type = n
@@ -687,11 +687,11 @@ class Maze:
         r, c = path[0]
         return r, c
     
-    def strategy3(self, dim, q,x):
-        #x = self.strat3_a_star(self.grid[0], q, 1, -1, -1)
-        #fire_row, fire_col = m.create_fire(dim)
+    def strategy3(self, dim, q):
+        x = self.strat3_a_star(self.grid[0], q, 1, -1, -1)
+        fire_row, fire_col = m.create_fire(dim)
         #self.print_grid(-1)
-        #self.fire_squares.append((fire_row, fire_col))
+        self.fire_squares.append((fire_row, fire_col))
         end = (self.cols * (dim - 1)) + (dim - 1)
         path = None
         if(x==0):
@@ -861,8 +861,8 @@ if __name__ == '__main__':
     #m.bfs(m.grid[0],-1, -1,1)
     #print(m.a_star(m.grid[0]))
     #m.strat3_a_star(m.grid[0],flammability,1,4,8)
-    #m.strategy3(dimension, flammability)
-    c=0
+    m.strategy3(dimension, flammability)
+''' c=0
     mazes = []
     for i in range(30):
         mazes.append(Maze(dimension,probability))
@@ -913,7 +913,7 @@ if __name__ == '__main__':
     #m.bfs(m.grid[0], fire_row, fire_col)
     #print(m.a_star(m.grid[0]))
     
-''' running = True
+ running = True
     while running:
         clock.tick(60)
         for event in pygame.event.get():
