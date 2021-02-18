@@ -59,7 +59,7 @@ class Square:
             self.current_dist = n
             self.heuristic = n + sqrt(((dimension - 1 - self.row)**2) + ((dimension - 1 - self.col)**2))
         elif mode==1 : #strategy 3 A star
-            self.heuristic =  (sqrt(((dimension - 1 - self.row)**2) + ((dimension - 1 - self.col)**2))) - ((sqrt(((fr - self.row)**2) + ((fc - self.col)**2)))/q)
+            self.heuristic =  (sqrt(((dimension - 1 - self.row)**2) + ((dimension - 1 - self.col)**2))) - ((sqrt(((fr - self.row)**2) + ((fc - self.col)**2)))*q)
             #print(f'{self.row}, {self.col}: dist from end {(sqrt(((dimension - 1 - self.row)**2) + ((dimension - 1 - self.col)**2)))} - dist from fire {(q * (sqrt(((fr - self.row)**2) + ((fc - self.col)**2))))}')
     def set_type(self, n):
         self.Square_type = n
@@ -325,13 +325,13 @@ class Maze:
         
         if (self.grid[1].get_type()==1) and (self.grid[(self.cols*1) + 0].get_type()==1):
             t2 = time.time()
-            print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
-            print( "No solution")
+           # print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
+          #  print( "No solution")
             return 2
         elif (self.grid[(self.cols * (self.rows-1)) + self.cols -2].get_type()==1) and (self.grid[(self.cols * (self.rows-2)) + self.cols - 1].get_type()==1):
             t2 = time.time()
-            print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
-            print( "No solution")
+           # print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
+           # print( "No solution")
             return 2
         
         fringe = []
@@ -356,9 +356,9 @@ class Maze:
             if mode == 1 and r == self.rows-1 and c == self.cols - 1:
                 #self.printPath(curr_loc)
                 t2 = time.time()
-                print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
+               # print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
                 #print("success, goal reached")
-                print( "done")
+                #print( "done")
                 return 0
             
             if mode == 2 and r == fire_row and c == fire_col:
@@ -442,8 +442,8 @@ class Maze:
                         heapq.heappush(fringe, self.grid[top])  
                          
         t2 = time.time()
-        print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
-        print("Not Done")
+        #print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
+        #print("Not Done")
         return 2 
                     
     
@@ -687,11 +687,11 @@ class Maze:
         r, c = path[0]
         return r, c
     
-    def strategy3(self, dim, q):
-        x = self.strat3_a_star(self.grid[0], q, 1, -1, -1)
-        fire_row, fire_col = m.create_fire(dim)
-        self.print_grid(-1)
-        self.fire_squares.append((fire_row, fire_col))
+    def strategy3(self, dim, q,x):
+        #x = self.strat3_a_star(self.grid[0], q, 1, -1, -1)
+        #fire_row, fire_col = m.create_fire(dim)
+        #self.print_grid(-1)
+        #self.fire_squares.append((fire_row, fire_col))
         end = (self.cols * (dim - 1)) + (dim - 1)
         path = None
         if(x==0):
@@ -703,8 +703,8 @@ class Maze:
             #path.pop(0)
             curr_loc = (self.cols*r1) + c1
             self.advance_fire(q)
-            print()
-            self.print_grid(curr_loc)
+            #print()
+            #self.print_grid(curr_loc)
             if (r1==dim-1) and (c1==dim-1):
                 return "goal reached"
             if (self.grid[end].get_type()==4):
@@ -864,12 +864,15 @@ if __name__ == '__main__':
     #m.strategy3(dimension, flammability)
     c=0
     mazes = []
-    for i in range(25):
+    for i in range(30):
         mazes.append(Maze(dimension,probability))
         mazes[i].populate_grid(dimension, probability)
         mazes[i].clear_visited()
-        x = mazes[i].bfs(mazes[i].grid[0], -1, -1, 1)
+        x = mazes[i].strat3_a_star(mazes[i].grid[0],flammability, 1, -1, -1)
+        #mazes[i].bfs(mazes[i].grid[0], -1, -1, 1)
+        #self.print_grid(-1)
         fire_row, fire_col = mazes[i].create_fire(dimension)
+        mazes[i].fire_squares.append((fire_row, fire_col))
         #mazes[i].fire_squares.append((fire_row, fire_col))
         mazes[i].clear_visited()
         y = mazes[i].bfs(mazes[i].grid[0], fire_row, fire_col, 2)
@@ -882,7 +885,7 @@ if __name__ == '__main__':
             #mazes[i].print_grid(-1)
             #print()
             #print("here2")
-            print(mazes[i].strategy2(dimension, flammability, x))
+            print(mazes[i].strategy3(dimension, flammability, x))
         if(c==10):
             break
         mazes[i].clear_visited()
@@ -909,8 +912,8 @@ if __name__ == '__main__':
     #m.grid[0].set_parent(0, 0)
     #m.bfs(m.grid[0], fire_row, fire_col)
     #print(m.a_star(m.grid[0]))
-    '''
-    running = True
+    
+''' running = True
     while running:
         clock.tick(60)
         for event in pygame.event.get():
