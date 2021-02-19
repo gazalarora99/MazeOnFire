@@ -913,7 +913,7 @@ if __name__ == '__main__':
     #m.grid[0].set_parent(0, 0)
     #m.bfs(m.grid[0], fire_row, fire_col)
     #print(m.a_star(m.grid[0]))
-    '''
+'''
  running = True
     while running:
         clock.tick(60)
