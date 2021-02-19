@@ -452,7 +452,7 @@ class Maze:
                 t2 = time.time()
              #   print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
                # print("success, goal reached")
-                self.printPath(curr_loc,0)
+                #self.printPath(curr_loc,0)
                 return "done"
             
             
@@ -756,12 +756,10 @@ class Maze:
             print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
             print("No solution")
             return 0
-        i = 0;
         
+        i = 0;
         while (path!=[] or i==0):
             if(fringe==[]):
-                #temp =
-                #path.pop() #remove the last object with no children
                 if path==[]:
                     t2 = time.time()
                     print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
@@ -773,8 +771,6 @@ class Maze:
                 continue
                 
             current = fringe.pop() #current is of type Square
-            #print("Exploring " + str(current.get_pos()) + "'s children")
-            #print(type(current))
             current.set_visited()
             if current.get_type() == 2: #goal state if Square's type is 2
                 print("i value is "+str(i))
@@ -782,11 +778,13 @@ class Maze:
                 print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
                 print("success, goal reached")
                 return 1
-            
             m, n = current.get_pos()
             position = (self.cols * m) + n
             path.append(self.grid[position])
-            fringe = self.get_fringe(m, n) #temporary list from get_fringe method
+            fringe = self.get_fringe(m, n) 
+            i= i+1
+            
+            #temporary list from get_fringe method
             #if(temp != []):
                 #for k in range(0, len(temp)): #iterate through temp in fifo order and add it to fringe so that peek of fringe is the last element visited in get_fringe
                     #fringe.append(temp[k])
@@ -797,7 +795,7 @@ class Maze:
                         #if(temp_fringe[k].get_pos() != temp.get_pos()):
                             #fringe.append(temp_fringe[k])
                 
-            i= i+1
+            
             #if i==25:
                 #print("i value is 25")
                 #break
@@ -821,8 +819,8 @@ if __name__ == '__main__':
     m = Maze(dimension,probability)
     m.populate_grid(dimension,probability)
     
-    m.a_star(m.grid[0])
-    '''flammability = float(input("Enter Flammability rate: "))
+    #m.a_star(m.grid[0])
+    flammability = float(input("Enter Flammability rate: "))
     md = int(input("Strat check: "))
     m = Maze(dimension,probability)
     m.populate_grid(dimension,probability)
@@ -868,7 +866,7 @@ if __name__ == '__main__':
     #print(m.a_star(m.grid[0]))
     #m.strat3_a_star(m.grid[0],flammability,1,4,8)
     #print(m.strategy3(dimension, flammability))
-''''''    
+'''    
  c=0
     i=0
     correct = 0
