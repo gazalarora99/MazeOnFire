@@ -255,13 +255,13 @@ class Maze:
     
     def printPath(self,curr_loc, start_square):
         solution = []
-        x,y = start_square.get_pos()
-        start = (self.cols*x) + y 
+        #x,y = start_square.get_pos()
+        #start = (self.cols*x) + y 
         
-        while curr_loc != start:
+        while curr_loc != start_square:
             solution.append(self.grid[curr_loc].get_pos())
             r,c = self.grid[curr_loc].get_parent();
-            self.print_grid(curr_loc)
+            #self.print_grid(curr_loc)
             curr_loc = (self.cols*r) + c 
             #print(solution)
         solution.reverse()
@@ -452,7 +452,7 @@ class Maze:
                 t2 = time.time()
              #   print(time.strftime("%H:%M:%S", time.gmtime(t2-t1)))
                # print("success, goal reached")
-                self.printPath(curr_loc,start_square)
+                self.printPath(curr_loc,0)
                 return "done"
             
             
