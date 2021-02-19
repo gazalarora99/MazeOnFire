@@ -56,7 +56,7 @@ def problem2():
     # naming the x axis 
     plt.xlabel("Obstacle Density 'p'") 
     # naming the y axis 
-    plt.ylabel('Probability that G can be reached from S') 
+    plt.ylabel('Probability that E can be reached from S') 
       
     # giving a title to my graph 
     plt.title('Problem 2: DFS on Maze of dimension 50') 
@@ -243,4 +243,4 @@ def prob3():
     plt.show()
 
 if __name__ == '__main__':
-    prob3() 
+    problem2() 
