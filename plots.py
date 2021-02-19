@@ -123,7 +123,7 @@ def strategy2():
       
     # function to show the plot 
     plt.show()
-def prob3():
+def prob3solvable():
         # x axis values 
     x = [0,
 0.05,
@@ -182,5 +182,65 @@ def prob3():
       
     # function to show the plot 
     plt.show()
+def prob3():
+        # x axis values 
+    x = [0,
+0.05,
+0.1,
+0.15,
+0.2,
+0.25,
+0.3,
+0.35,
+0.4,
+0.45,
+0.5,
+0.55,
+0.6,
+0.65,
+0.7,
+0.75,
+0.8,
+0.85,
+0.9,
+0.95,
+1] 
+    # corresponding y axis values 
+    y = [3.66,
+4.44,
+5.06,
+6.18,
+9.08,
+20.78,
+20.82,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0]
+      
+    # plotting the points  
+    plt.plot(x, y) 
+      
+    # naming the x axis 
+    plt.xlabel("Obstacle Density 'p'") 
+    # naming the y axis 
+    plt.ylabel('Average nodes (explored by BFS - explored by A*)') 
+      
+    # giving a title to my graph 
+    plt.title('Problem 3: At dimension = 100') 
+      
+    # function to show the plot 
+    plt.show()
+
 if __name__ == '__main__':
     prob3() 
